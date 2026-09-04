@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <name>Lead Conversion by Source</name>
+    <description>리드 소스별 전환 여부 분포 (전환율 파악용)</description>
+    <format>Summary</format>
+    <reportType>LeadList</reportType>
+    <groupingsDown>
+        <field>LEAD_SOURCE</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <groupingsDown>
+        <field>CONVERTED</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <columns>
+        <field>COMPANY</field>
+    </columns>
+</Report>

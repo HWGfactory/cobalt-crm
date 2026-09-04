@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <name>Pipeline Funnel by Stage</name>
+    <description>오픈 파이프라인의 단계별 건수/금액 퍼널</description>
+    <format>Summary</format>
+    <reportType>Opportunity</reportType>
+    <groupingsDown>
+        <field>STAGE_NAME</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <columns>
+        <field>OPPORTUNITY_NAME</field>
+    </columns>
+    <columns>
+        <field>AMOUNT</field>
+        <aggregateTypes>Sum</aggregateTypes>
+    </columns>
+    <columns>
+        <field>CLOSE_DATE</field>
+    </columns>
+    <chart>
+        <chartSummaries>
+            <aggregate>Sum</aggregate>
+            <axisBinding>y</axisBinding>
+            <column>AMOUNT</column>
+        </chartSummaries>
+        <chartType>Funnel</chartType>
+        <groupingColumn>STAGE_NAME</groupingColumn>
+        <legendPosition>Right</legendPosition>
+        <location>CHART_TOP</location>
+        <size>Medium</size>
+        <summaryAxisRange>Auto</summaryAxisRange>
+        <showValues>true</showValues>
+    </chart>
+    <standardDateFilter>
+        <column>CLOSE_DATE</column>
+        <durationValue>ALL_TIME</durationValue>
+    </standardDateFilter>
+</Report>

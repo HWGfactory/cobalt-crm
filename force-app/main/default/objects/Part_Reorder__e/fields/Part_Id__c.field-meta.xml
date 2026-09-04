@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Part_Id__c</fullName>
+    <description>재고 부족 임계값에 도달한 Part__c의 레코드 Id</description>
+    <label>Part Id</label>
+    <length>18</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

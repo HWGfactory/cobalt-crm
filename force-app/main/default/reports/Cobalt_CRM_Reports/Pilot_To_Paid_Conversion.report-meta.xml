@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <name>Pilot to Paid Conversion</name>
+    <description>Pilot 진행 건 중 연결된 Opportunity가 Closed Won으로 전환된 비율</description>
+    <format>Summary</format>
+    <reportType>CustomEntity$Pilot__c</reportType>
+    <groupingsDown>
+        <field>Pilot__c.Converted_To_Paid__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <columns>
+        <field>CUST_NAME</field>
+    </columns>
+</Report>
