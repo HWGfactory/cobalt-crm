@@ -1,0 +1,91 @@
+<template>
+    <div class="field-completion">
+        <!-- 작업 요약 헤더 -->
+        <div class="wo-header">
+            <template if:true={hasSummary}>
+                <p class="wo-number">{summary.workOrderNumber}</p>
+                <p class="wo-customer">{summary.customerName}</p>
+                <p class="wo-address">{summary.serviceAddress}</p>
+            </template>
+            <template if:false={hasSummary}>
+                <lightning-spinner alternative-text="로딩 중" size="small"></lightning-spinner>
+            </template>
+        </div>
+
+        <template if:true={loadError}>
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                <span>{loadError}</span>
+            </div>
+        </template>
+
+        <div class="scroll-area">
+            <!-- 완료 체크리스트 -->
+            <div class="section checklist-section">
+                <h3 class="section-title">완료 체크리스트</h3>
+                <template for:each={checklistItems} for:item="item">
+                    <div key={item.key} class="checklist-item">
+                        <lightning-input
+                            type="checkbox"
+                            label={item.label}
+                            checked={item.checked}
+                            data-key={item.key}
+                            onchange={handleChecklistChange}
+                        ></lightning-input>
+                    </div>
+                </template>
+            </div>
+
+            <!-- 사진 첨부 -->
+            <div class="section photo-section">
+                <h3 class="section-title">사진 첨부</h3>
+                <template if:true={recordId}>
+                    <lightning-file-upload
+                        label="현장 사진 업로드"
+                        name="fieldPhotos"
+                        record-id={recordId}
+                        accept={acceptedFormats}
+                        multiple
+                        onuploadfinished={handleUploadFinished}
+                    ></lightning-file-upload>
+                </template>
+                <template if:true={hasUploadedPhotos}>
+                    <p class="upload-confirm">사진 {uploadedPhotoCount}장 첨부됨</p>
+                </template>
+            </div>
+
+            <!-- 고객 전자서명 -->
+            <div class="section signature-section">
+                <h3 class="section-title">고객 서명</h3>
+                <div class="canvas-wrapper">
+                    <canvas
+                        class="signature-canvas"
+                        onmousedown={handlePointerDown}
+                        onmousemove={handlePointerMove}
+                        onmouseup={handlePointerUp}
+                        onmouseleave={handlePointerUp}
+                        ontouchstart={handlePointerDown}
+                        ontouchmove={handlePointerMove}
+                        ontouchend={handlePointerUp}
+                    ></canvas>
+                </div>
+                <div class="signature-actions">
+                    <lightning-button label="지우기" variant="neutral" onclick={handleClearSignature}></lightning-button>
+                    <template if:true={hasSignature}>
+                        <span class="signature-confirm">서명 완료</span>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 고정 완료 버튼 -->
+        <div class="complete-bar">
+            <lightning-button
+                class="complete-button"
+                label="작업 완료"
+                variant="brand"
+                onclick={handleComplete}
+                disabled={isCompleteDisabled}
+            ></lightning-button>
+        </div>
+    </div>
+</template>

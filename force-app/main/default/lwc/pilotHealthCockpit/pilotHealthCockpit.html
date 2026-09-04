@@ -1,0 +1,70 @@
+<template>
+    <lightning-card title="Pilot Health Cockpit" icon-name="standard:maintenance_asset">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <template if:true={loadError}>
+                <div class="slds-text-color_error slds-p-vertical_small">{loadError}</div>
+            </template>
+
+            <template if:true={hasPilots}>
+                <template for:each={pilots} for:item="pilot">
+                    <div key={pilot.pilotId} class="slds-box slds-box_x-small slds-m-bottom_small">
+                        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start">
+                            <div>
+                                <p class="slds-text-heading_small slds-m-bottom_xx-small">{pilot.name}</p>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    {pilot.startDate} ~ {pilot.endDate}
+                                </p>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    기술자 {pilot.technicianCount}명
+                                </p>
+                            </div>
+                            <div class="slds-text-align_right">
+                                <span class={pilot.healthBadgeClass}>
+                                    <lightning-icon
+                                        icon-name={pilot.healthIcon}
+                                        size="xx-small"
+                                        variant="inverse"
+                                        class="slds-m-right_xx-small"
+                                    ></lightning-icon>
+                                    {pilot.health}
+                                </span>
+                                <p class={pilot.ddayClass}>{pilot.ddayLabel}</p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <template if:false={hasPilots}>
+                <div class="slds-illustration slds-illustration_small slds-p-vertical_medium slds-text-align_center slds-text-color_weak">
+                    연결된 Pilot 레코드가 없습니다.
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <lightning-card title="MEDDIC Qualification Scorecard" icon-name="standard:opportunity" class="slds-m-top_small">
+        <div class="slds-grid slds-wrap slds-p-horizontal_medium slds-p-bottom_medium slds-grid_vertical-align-center">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-text-align_center slds-p-bottom_small">
+                <lightning-progress-ring value={completionPct} size="large" variant={ringVariant}></lightning-progress-ring>
+                <p class="slds-text-heading_medium slds-m-top_x-small">{completionPctLabel}</p>
+                <p class="slds-text-body_small slds-text-color_weak">완성도</p>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                <ul class="slds-list_vertical slds-has-dividers_top-space">
+                    <template for:each={meddicFields} for:item="field">
+                        <li key={field.label} class="slds-item slds-p-vertical_xx-small">
+                            <lightning-icon
+                                icon-name={field.iconName}
+                                variant={field.iconVariant}
+                                size="x-small"
+                                class="slds-m-right_x-small"
+                            ></lightning-icon>
+                            <span class={field.textClass}>{field.label}</span>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </lightning-card>
+</template>

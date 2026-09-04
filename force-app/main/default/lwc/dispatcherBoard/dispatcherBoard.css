@@ -1,0 +1,244 @@
+.dispatcher-board {
+    background-color: #f3f2f2;
+}
+
+/* 상단 요약 통계 바 */
+.stat-card {
+    text-align: center;
+    background: #ffffff;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #706e6b;
+    margin: 0;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #16325c;
+    margin: 0.125rem 0 0 0;
+}
+
+.stat-unassigned .stat-value {
+    color: #ba0517;
+}
+
+.stat-in-progress .stat-value {
+    color: #b16609;
+}
+
+.stat-completed .stat-value {
+    color: #04844b;
+}
+
+/* 칸반 컬럼 레이아웃 */
+.kanban-columns {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.kanban-column {
+    flex: 1 1 0;
+    min-width: 0;
+    background: #eef1f6;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    max-height: 75vh;
+}
+
+.column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem 0.25rem 0 0;
+    color: #ffffff;
+}
+
+.column-header h3 {
+    color: #ffffff;
+    margin: 0;
+}
+
+.status-new {
+    background-color: #706e6b;
+}
+
+.status-assigned {
+    background-color: #0176d3;
+}
+
+.status-en-route {
+    background-color: #9050e9;
+}
+
+.status-on-site {
+    background-color: #ff9a3c;
+}
+
+.status-completed {
+    background-color: #04844b;
+}
+
+.column-count {
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 1rem;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.column-body {
+    padding: 0.5rem;
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+.empty-column {
+    text-align: center;
+    color: #706e6b;
+    font-size: 0.75rem;
+    padding: 1rem 0;
+}
+
+/* Work Order 카드 */
+.wo-card {
+    background: #ffffff;
+    border-radius: 0.25rem;
+    border-left: 4px solid #c9c7c5;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.wo-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+    transform: translateY(-1px);
+}
+
+.wo-card.priority-emergency {
+    border-left-color: #ea001e;
+}
+
+.wo-card.priority-high {
+    border-left-color: #ff9a3c;
+}
+
+.wo-number {
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: #16325c;
+}
+
+.wo-customer {
+    font-size: 0.8125rem;
+    margin: 0.125rem 0;
+    color: #16325c;
+}
+
+.wo-address {
+    font-size: 0.75rem;
+    color: #706e6b;
+    margin: 0;
+}
+
+.wo-eta {
+    font-size: 0.75rem;
+    color: #0176d3;
+    margin: 0.25rem 0 0 0;
+}
+
+.reassign-control {
+    cursor: default;
+}
+
+/* 우선순위 뱃지 */
+.priority-badge {
+    font-size: 0.6875rem;
+    line-height: 1.2rem;
+    padding: 0 0.5rem;
+    border-radius: 0.75rem;
+    color: #ffffff;
+    white-space: nowrap;
+    background-color: #706e6b;
+}
+
+.priority-badge.priority-emergency {
+    background-color: #ea001e;
+}
+
+.priority-badge.priority-high {
+    background-color: #ff9a3c;
+}
+
+.priority-badge.priority-medium {
+    background-color: #0176d3;
+}
+
+.priority-badge.priority-low {
+    background-color: #706e6b;
+}
+
+/* 기술자 위치 패널 */
+.technician-panel {
+    background: #ffffff;
+}
+
+.technician-row {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ecebea;
+}
+
+.technician-row:last-child {
+    border-bottom: none;
+}
+
+.tech-name {
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: #16325c;
+    margin: 0;
+}
+
+.tech-region {
+    font-size: 0.75rem;
+    color: #706e6b;
+    margin: 0;
+}
+
+.availability-badge {
+    font-size: 0.6875rem;
+    line-height: 1.2rem;
+    padding: 0 0.5rem;
+    border-radius: 0.75rem;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.availability-badge.available {
+    background-color: #04844b;
+}
+
+.availability-badge.unavailable {
+    background-color: #706e6b;
+}
+
+/* 반응형: 모바일에서는 칸반 컬럼을 세로 1열로 스택 */
+@media (max-width: 768px) {
+    .kanban-columns {
+        flex-direction: column;
+    }
+
+    .kanban-column {
+        max-height: none;
+        min-width: 0;
+    }
+}

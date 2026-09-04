@@ -1,0 +1,138 @@
+:host {
+    display: block;
+}
+
+.field-completion {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f3f2f2;
+    font-size: 0.875rem;
+}
+
+/* 작업 요약 헤더 */
+.wo-header {
+    background-color: #16325c;
+    color: #ffffff;
+    padding: 1rem;
+}
+
+.wo-number {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.wo-customer {
+    font-size: 0.9375rem;
+    margin: 0.25rem 0 0 0;
+}
+
+.wo-address {
+    font-size: 0.8125rem;
+    color: #d8dde6;
+    margin: 0.125rem 0 0 0;
+}
+
+/* 스크롤 영역: 하단 고정 버튼에 가려지지 않도록 여백 확보 */
+.scroll-area {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 1rem 6rem 1rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.section {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #16325c;
+    margin: 0 0 0.75rem 0;
+}
+
+/* 완료 체크리스트: 터치하기 쉬운 큰 영역 */
+.checklist-item {
+    padding: 0.625rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+/* 사진 첨부 */
+.upload-confirm {
+    margin-top: 0.5rem;
+    color: #04844b;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+/* 전자서명 캔버스 */
+.canvas-wrapper {
+    border: 2px dashed #c9c7c5;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: #fafaf9;
+}
+
+.signature-canvas {
+    display: block;
+    width: 100%;
+    height: 220px;
+    /* 서명 중 페이지가 스크롤되지 않도록 캔버스 영역에서 기본 터치 동작을 막는다 */
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: crosshair;
+}
+
+.signature-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+}
+
+.signature-confirm {
+    color: #04844b;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* 하단 고정 완료 버튼: 큰 터치 타겟 */
+.complete-bar {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.complete-button {
+    display: block;
+    width: 100%;
+    min-height: 3rem;
+    --slds-c-button-brand-color-background: #04844b;
+    --slds-c-button-brand-color-background-hover: #06713f;
+    --slds-c-button-brand-color-border: #04844b;
+}
+
+/* 데스크톱 등 넓은 화면에서는 폭을 제한해 모바일 우선 레이아웃을 유지 */
+@media (min-width: 768px) {
+    .field-completion {
+        max-width: 480px;
+        margin: 0 auto;
+        min-height: auto;
+        box-shadow: 0 0 0 1px #dddbda;
+    }
+}

@@ -1,0 +1,71 @@
+:host {
+    display: block;
+}
+
+.sla-countdown-widget {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    border: 1px solid #dddbda;
+}
+
+.countdown-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #706e6b;
+    margin: 0 0 0.25rem 0;
+}
+
+.countdown-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.severity-ok {
+    color: #04844b;
+}
+
+.severity-warning {
+    color: #b16609;
+}
+
+.severity-critical {
+    color: #ea001e;
+    animation: sla-pulse 1s ease-in-out infinite;
+}
+
+@keyframes sla-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}
+
+.overdue-tag {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #ea001e;
+}
+
+.no-deadline {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #706e6b;
+    margin: 0;
+}
+
+.load-error {
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: #ea001e;
+}

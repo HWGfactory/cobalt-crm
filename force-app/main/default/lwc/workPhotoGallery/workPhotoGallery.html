@@ -1,0 +1,63 @@
+<template>
+    <div class="photo-gallery">
+        <div class="gallery-header">
+            <h3 class="gallery-title">현장 사진</h3>
+            <div class="upload-control">
+                <label class="upload-label" for="photo-input">
+                    <lightning-icon icon-name="utility:add" size="x-small" variant="inverse"></lightning-icon>
+                    <span>사진 추가</span>
+                </label>
+                <input
+                    type="file"
+                    id="photo-input"
+                    class="photo-input"
+                    accept="image/*"
+                    multiple
+                    onchange={handleFilesSelected}
+                />
+            </div>
+        </div>
+
+        <template if:true={loadError}>
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                <span>{loadError}</span>
+            </div>
+        </template>
+
+        <template if:true={hasPhotos}>
+            <div class="thumbnail-grid">
+                <template for:each={photos} for:item="photo">
+                    <div
+                        key={photo.key}
+                        class="thumbnail-cell"
+                        data-key={photo.key}
+                        onclick={handleThumbnailClick}
+                    >
+                        <img src={photo.thumbnailUrl} alt={photo.title} class="thumbnail-image" />
+                        <template if:true={photo.isPending}>
+                            <div class="pending-overlay">
+                                <lightning-spinner alternative-text="업로드 중" size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:false={hasPhotos}>
+            <p class="empty-state">아직 첨부된 사진이 없습니다.</p>
+        </template>
+
+        <!-- 라이트박스 오버레이 -->
+        <template if:true={lightboxOpen}>
+            <div class="lightbox-overlay" onclick={closeLightbox}>
+                <div class="lightbox-content" onclick={stopPropagation}>
+                    <button class="lightbox-close" onclick={closeLightbox} aria-label="닫기" title="닫기">&times;</button>
+                    <button class="lightbox-nav lightbox-prev" onclick={showPrevious} aria-label="이전 사진" title="이전">&#10094;</button>
+                    <img src={currentPhoto.fullUrl} alt={currentPhoto.title} class="lightbox-image" />
+                    <button class="lightbox-nav lightbox-next" onclick={showNext} aria-label="다음 사진" title="다음">&#10095;</button>
+                    <p class="lightbox-caption">{currentPhoto.title}</p>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

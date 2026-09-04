@@ -1,0 +1,18 @@
+<template>
+    <div class="sla-countdown-widget">
+        <template if:true={hasDeadline}>
+            <p class="countdown-label">SLA 마감까지</p>
+            <p class={severityClass}>{timeLabel}</p>
+            <template if:true={isOverdue}>
+                <p class="overdue-tag">SLA 초과</p>
+            </template>
+        </template>
+        <template if:false={hasDeadline}>
+            <p class="countdown-label">SLA 마감까지</p>
+            <p class="no-deadline">마감 시각 미설정</p>
+        </template>
+        <template if:true={loadError}>
+            <p class="load-error">{loadError}</p>
+        </template>
+    </div>
+</template>
