@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <actionCalls>
+        <name>Call_Send_Customer_Notification</name>
+        <label>Send Customer Notification 호출</label>
+        <locationX>264</locationX>
+        <locationY>566</locationY>
+        <actionName>SendCustomerNotification</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>workOrderId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <decisions>
+        <name>Determine_New_Status</name>
+        <label>새 상태 판별</label>
+        <locationX>176</locationX>
+        <locationY>350</locationY>
+        <defaultConnectorLabel>기타 상태(알림 없음)</defaultConnectorLabel>
+        <rules>
+            <name>Status_En_Route</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>En Route</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Call_Send_Customer_Notification</targetReference>
+            </connector>
+            <label>En Route로 변경됨</label>
+        </rules>
+        <rules>
+            <name>Status_On_Site</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>On Site</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Call_Send_Customer_Notification</targetReference>
+            </connector>
+            <label>On Site로 변경됨</label>
+        </rules>
+        <rules>
+            <name>Status_Completed</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Status__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Completed</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Call_Send_Customer_Notification</targetReference>
+            </connector>
+            <label>Completed로 변경됨</label>
+        </rules>
+    </decisions>
+    <description>Work_Order__c의 Status__c가 변경될 때(En Route/On Site/Completed) 고객에게 알림을 발송합니다.
+
+[하이브리드 설계 결정 로그]
+- 이 Flow는 &quot;언제, 어떤 상태 변경에 대해&quot; 알림을 트리거할지를 선언적으로 표현한다(비개발 담당자도 Flow Builder에서 분기 조건을 읽고 수정 가능하다).
+- 실제 발송(외부 Messaging API 콜아웃)은 Apex(SendCustomerNotification -&gt; CustomerNotificationQueueable)에 위임한다. 이유:
+  1) Flow의 선언형 액션만으로는 Named Credential 인증, 비동기 Queueable 처리, 실패 시 Integration_Log__c 기록 같은 견고성 요구사항을 조합하기 어렵다.
+  2) 콜아웃 로직을 Apex로 격리하면 HttpCalloutMock 기반 단위 테스트로 회귀 위험을 낮출 수 있다.
+  3) 메시지 문안이나 재시도 정책이 바뀌어도 Flow 재배포 없이 Apex 클래스만 수정하면 된다.
+- 즉 &quot;조건/분기&quot;는 선언형(Flow)에 남기고 &quot;콜아웃·인증·로깅&quot;은 코드(Apex)로 캡슐화하는 하이브리드 자동화 패턴이다.</description>
+    <environments>Default</environments>
+    <interviewLabel>WorkOrder Status Notification {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>WorkOrder Status Notification</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Determine_New_Status</targetReference>
+        </connector>
+        <filterFormula>ISCHANGED({!$Record.Status__c})</filterFormula>
+        <object>Work_Order__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

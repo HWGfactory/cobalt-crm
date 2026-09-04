@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <decisions>
+        <name>Check_Eligibility</name>
+        <label>Check Eligibility</label>
+        <locationX>176</locationX>
+        <locationY>140</locationY>
+        <defaultConnectorLabel>Not Eligible</defaultConnectorLabel>
+        <rules>
+            <name>Eligible_For_Reminder</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.End_Date__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <elementReference>TargetEndDate</elementReference>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Pilot_Health__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>Stalled</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Create_Reminder_Task</targetReference>
+            </connector>
+            <label>Eligible For Reminder</label>
+        </rules>
+    </decisions>
+    <formulas>
+        <name>TargetEndDate</name>
+        <dataType>Date</dataType>
+        <expression>TODAY() + 5</expression>
+    </formulas>
+    <formulas>
+        <name>TaskSubjectText</name>
+        <dataType>String</dataType>
+        <expression>&quot;[Pilot 종료 임박] &quot; &amp; {!$Record.Name} &amp; &quot; - 5일 후 종료&quot;</expression>
+    </formulas>
+    <interviewLabel>Pilot EndDate Reminder {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Pilot EndDate Reminder</label>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <name>Create_Reminder_Task</name>
+        <label>Create Reminder Task</label>
+        <locationX>176</locationX>
+        <locationY>240</locationY>
+        <inputAssignments>
+            <field>ActivityDate</field>
+            <value>
+                <elementReference>$Record.End_Date__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Description</field>
+            <value>
+                <stringValue>파일럿이 5일 후 종료됩니다. 전환 논의를 시작하세요.</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>OwnerId</field>
+            <value>
+                <elementReference>$Record.OwnerId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Priority</field>
+            <value>
+                <stringValue>High</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value>
+                <stringValue>Not Started</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Subject</field>
+            <value>
+                <elementReference>TaskSubjectText</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>WhatId</field>
+            <value>
+                <elementReference>$Record.Opportunity__c</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Task</object>
+    </recordCreates>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Check_Eligibility</targetReference>
+        </connector>
+        <object>Pilot__c</object>
+        <schedule>
+            <frequency>Daily</frequency>
+            <startDate>2026-08-29</startDate>
+            <startTime>09:00:00.000Z</startTime>
+        </schedule>
+        <triggerType>Scheduled</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

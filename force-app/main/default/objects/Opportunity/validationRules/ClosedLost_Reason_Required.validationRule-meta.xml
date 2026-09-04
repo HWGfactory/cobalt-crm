@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ClosedLost_Reason_Required</fullName>
+    <active>true</active>
+    <description>Closed Lost 저장 시 실패 사유(Closed_Lost_Reason__c) 필수 입력</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(StageName, &apos;Closed Lost&apos;),
+    ISBLANK(TEXT(Closed_Lost_Reason__c))
+)</errorConditionFormula>
+    <errorDisplayField>Closed_Lost_Reason__c</errorDisplayField>
+    <errorMessage>Closed Lost로 저장하려면 실패 사유(Closed Lost Reason)를 반드시 선택해야 합니다.</errorMessage>
+</ValidationRule>

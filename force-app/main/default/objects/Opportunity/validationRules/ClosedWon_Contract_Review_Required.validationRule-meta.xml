@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ClosedWon_Contract_Review_Required</fullName>
+    <active>true</active>
+    <description>Closed Won 전환 시 계약서 검토 체크박스(Contract_Reviewed__c) 필수 체크</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(StageName, &apos;Closed Won&apos;),
+    Contract_Reviewed__c = false
+)</errorConditionFormula>
+    <errorDisplayField>Contract_Reviewed__c</errorDisplayField>
+    <errorMessage>Closed Won으로 이동하려면 계약서 검토(Contract Reviewed) 체크박스를 반드시 체크해야 합니다.</errorMessage>
+</ValidationRule>

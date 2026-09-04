@@ -1,0 +1,6 @@
+{!Opportunity.Name} 건의 할인 승인 요청이 거부되었습니다.
+
+할인율: {!Opportunity.Discount_Pct__c}%
+Stage는 이전 단계로 되돌아갔습니다.
+
+담당자: {!Opportunity.Owner}

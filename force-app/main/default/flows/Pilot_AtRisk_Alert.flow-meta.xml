@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <actionCalls>
+        <name>Send_InApp_Notification</name>
+        <label>Send InApp Notification</label>
+        <locationX>176</locationX>
+        <locationY>440</locationY>
+        <actionName>customNotificationAction</actionName>
+        <actionType>customNotificationAction</actionType>
+        <connector>
+            <targetReference>Send_Email_Alert</targetReference>
+        </connector>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>recipientIds</name>
+            <value>
+                <elementReference>RecipientIds</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>customNotifTypeId</name>
+            <value>
+                <elementReference>Get_Notification_Type.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>title</name>
+            <value>
+                <elementReference>NotifTitleFormula</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>body</name>
+            <value>
+                <elementReference>NotifBodyFormula</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>targetId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <actionCalls>
+        <name>Send_Email_Alert</name>
+        <label>Send Email Alert</label>
+        <locationX>176</locationX>
+        <locationY>540</locationY>
+        <actionName>Pilot__c.Pilot_AtRisk_Owner_Alert</actionName>
+        <actionType>emailAlert</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>SObjectRowId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <assignments>
+        <name>Add_Owner_To_Recipients</name>
+        <label>Add Owner To Recipients</label>
+        <locationX>176</locationX>
+        <locationY>340</locationY>
+        <assignmentItems>
+            <assignToReference>RecipientIds</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>$Record.OwnerId</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Send_InApp_Notification</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>Check_Was_Not_AtRisk_Before</name>
+        <label>Check Was Not AtRisk Before</label>
+        <locationX>176</locationX>
+        <locationY>140</locationY>
+        <defaultConnectorLabel>No Action</defaultConnectorLabel>
+        <rules>
+            <name>Newly_AtRisk</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record__Prior.Pilot_Health__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>At Risk</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Get_Notification_Type</targetReference>
+            </connector>
+            <label>Newly At Risk</label>
+        </rules>
+    </decisions>
+    <formulas>
+        <name>NotifTitleFormula</name>
+        <dataType>String</dataType>
+        <expression>"[긴급] Pilot Health At Risk: " &amp; {!$Record.Name}</expression>
+    </formulas>
+    <formulas>
+        <name>NotifBodyFormula</name>
+        <dataType>String</dataType>
+        <expression>{!$Record.Name} &amp; " 파일럿의 상태가 At Risk로 변경되었습니다. 종료일: " &amp; TEXT({!$Record.End_Date__c})</expression>
+    </formulas>
+    <interviewLabel>Pilot AtRisk Alert {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Pilot AtRisk Alert</label>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Notification_Type</name>
+        <label>Get Notification Type</label>
+        <locationX>176</locationX>
+        <locationY>240</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Add_Owner_To_Recipients</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>DeveloperName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Pilot_At_Risk_Alert</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>CustomNotificationType</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Check_Was_Not_AtRisk_Before</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Pilot_Health__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>At Risk</stringValue>
+            </value>
+        </filters>
+        <object>Pilot__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>RecipientIds</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

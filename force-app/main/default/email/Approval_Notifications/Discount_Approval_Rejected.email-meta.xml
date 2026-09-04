@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Discount Approval Rejected</name>
+    <style>none</style>
+    <subject>[승인 거부] {!Opportunity.Name} 할인 승인이 거부되었습니다</subject>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

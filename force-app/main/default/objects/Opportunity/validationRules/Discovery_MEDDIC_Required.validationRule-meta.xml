@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Discovery_MEDDIC_Required</fullName>
+    <active>true</active>
+    <description>Discovery 단계에서 Economic Buyer 또는 Identify Pain 중 하나 이상 입력 필수</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(StageName, &apos;Discovery&apos;),
+    ISBLANK(Economic_Buyer__c),
+    ISBLANK(Identify_Pain__c)
+)</errorConditionFormula>
+    <errorDisplayField>Economic_Buyer__c</errorDisplayField>
+    <errorMessage>Discovery 단계에서는 Economic Buyer 또는 Identify Pain 중 하나 이상 입력해야 합니다.</errorMessage>
+</ValidationRule>

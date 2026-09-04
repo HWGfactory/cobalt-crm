@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>Pilot_At_Risk_Alert</customNotifTypeName>
+    <description>Pilot Health가 At Risk로 변경되었을 때 담당 rep에게 발송되는 인앱 알림</description>
+    <desktop>true</desktop>
+    <masterLabel>Pilot At Risk Alert</masterLabel>
+    <mobile>true</mobile>
+</CustomNotificationType>

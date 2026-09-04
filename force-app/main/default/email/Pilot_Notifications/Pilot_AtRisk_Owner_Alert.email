@@ -1,0 +1,4 @@
+{!Pilot__c.Name} 파일럿의 상태가 At Risk로 변경되었습니다.
+고객사: {!Pilot__c.Account__r.Name}
+종료일: {!Pilot__c.End_Date__c}
+즉시 고객과 연락하여 상황을 점검하세요.

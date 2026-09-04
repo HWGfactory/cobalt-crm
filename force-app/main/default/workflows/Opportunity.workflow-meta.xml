@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Notify_Owner_Discount_Approved</fullName>
+        <description>할인 승인 완료 시 Opportunity Owner에게 알림</description>
+        <protected>false</protected>
+        <recipients>
+            <type>owner</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>Approval_Notifications/Discount_Approval_Approved</template>
+    </alerts>
+    <alerts>
+        <fullName>Notify_Owner_Discount_Rejected</fullName>
+        <description>할인 승인 거부 시 Opportunity Owner에게 알림</description>
+        <protected>false</protected>
+        <recipients>
+            <type>owner</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>Approval_Notifications/Discount_Approval_Rejected</template>
+    </alerts>
+    <fieldUpdates>
+        <fullName>Revert_Opportunity_Stage</fullName>
+        <field>StageName</field>
+        <formula>PRIORVALUE(StageName)</formula>
+        <name>Revert Opportunity Stage</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Formula</operation>
+        <protected>false</protected>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Set_Discount_Approved</fullName>
+        <field>Discount_Approved__c</field>
+        <literalValue>1</literalValue>
+        <name>Set Discount Approved</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+    </fieldUpdates>
+</Workflow>

@@ -1,0 +1,6 @@
+{!Opportunity.Name} 건의 할인 승인 요청이 최종 승인되었습니다.
+
+할인율: {!Opportunity.Discount_Pct__c}%
+Stage: {!Opportunity.StageName}
+
+담당자: {!Opportunity.Owner}

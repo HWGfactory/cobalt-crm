@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <assignments>
+        <name>Set_Score_And_Description</name>
+        <label>Set Score And Description</label>
+        <locationX>176</locationX>
+        <locationY>240</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Score__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>TotalScore</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>$Record.Description</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>ScoreDescriptionText</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Route_By_Score</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_Senior_Owner</name>
+        <label>Assign Senior Owner</label>
+        <locationX>176</locationX>
+        <locationY>440</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.OwnerId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>005g8000007UIzoAAG</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <assignments>
+        <name>Assign_Rep_Owner</name>
+        <label>Assign Rep Owner</label>
+        <locationX>376</locationX>
+        <locationY>440</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.OwnerId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>005g8000008HudBAAS</stringValue>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <decisions>
+        <name>Route_By_Score</name>
+        <label>Route By Score</label>
+        <locationX>176</locationX>
+        <locationY>340</locationY>
+        <defaultConnector>
+            <targetReference>Assign_Rep_Owner</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Below 70 (2nd/3rd Rep)</defaultConnectorLabel>
+        <rules>
+            <name>Score_70_Plus</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>TotalScore</leftValueReference>
+                <operator>GreaterThanOrEqualTo</operator>
+                <rightValue>
+                    <numberValue>70.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assign_Senior_Owner</targetReference>
+            </connector>
+            <label>70 or More (Senior Rep)</label>
+        </rules>
+    </decisions>
+    <formulas>
+        <name>CompanySizeScore</name>
+        <dataType>Number</dataType>
+        <expression>IF({!$Record.NumberOfEmployees} &gt;= 200, 30, IF({!$Record.NumberOfEmployees} &gt;= 50, 20, 10))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>IndustryScore</name>
+        <dataType>Number</dataType>
+        <expression>IF(OR(ISPICKVAL({!$Record.Industry}, &quot;Utilities&quot;), ISPICKVAL({!$Record.Industry}, &quot;Construction&quot;), ISPICKVAL({!$Record.Industry}, &quot;Transportation&quot;)), 30, IF(OR(ISPICKVAL({!$Record.Industry}, &quot;Technology&quot;), ISPICKVAL({!$Record.Industry}, &quot;Manufacturing&quot;)), 20, 10))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>LeadSourceScore</name>
+        <dataType>Number</dataType>
+        <expression>IF(OR(ISPICKVAL({!$Record.LeadSource}, &quot;Web&quot;), ISPICKVAL({!$Record.LeadSource}, &quot;Partner Referral&quot;)), 20, IF(OR(ISPICKVAL({!$Record.LeadSource}, &quot;Cold Call&quot;), ISPICKVAL({!$Record.LeadSource}, &quot;Employee Referral&quot;)), 10, 5))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>TotalScore</name>
+        <dataType>Number</dataType>
+        <expression>{!CompanySizeScore} + {!IndustryScore} + {!LeadSourceScore}</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>ScoreDescriptionText</name>
+        <dataType>String</dataType>
+        <expression>&quot;Score: &quot; &amp; TEXT({!TotalScore})</expression>
+    </formulas>
+    <interviewLabel>Lead Scoring and Routing {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Lead Scoring and Routing</label>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Set_Score_And_Description</targetReference>
+        </connector>
+        <object>Lead</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

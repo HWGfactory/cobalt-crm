@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <formulas>
+        <name>FilledFieldsCount</name>
+        <dataType>Number</dataType>
+        <expression>(IF(ISBLANK({!Metrics_Input}),0,1)) + (IF(ISBLANK({!Economic_Buyer_Input}),0,1)) + (IF(ISBLANK({!Decision_Criteria_Input}),0,1)) + (IF(ISBLANK({!Decision_Process_Input}),0,1)) + (IF(ISBLANK({!Identify_Pain_Input}),0,1)) + (IF(ISBLANK({!Champion_Input}),0,1))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>MeddicCompletionPct</name>
+        <dataType>Number</dataType>
+        <expression>{!FilledFieldsCount} / 6 * 100</expression>
+        <scale>2</scale>
+    </formulas>
+    <interviewLabel>MEDDIC Qualification {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>MEDDIC Qualification Screen Flow</label>
+    <processType>Flow</processType>
+    <recordUpdates>
+        <name>Update_Opportunity</name>
+        <label>Update Opportunity</label>
+        <locationX>176</locationX>
+        <locationY>740</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </filters>
+        <object>Opportunity</object>
+        <inputAssignments>
+            <field>Metrics__c</field>
+            <value>
+                <elementReference>Metrics_Input</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Economic_Buyer__c</field>
+            <value>
+                <elementReference>Economic_Buyer_Input</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Decision_Criteria__c</field>
+            <value>
+                <elementReference>Decision_Criteria_Input</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Decision_Process__c</field>
+            <value>
+                <elementReference>Decision_Process_Input</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Identify_Pain__c</field>
+            <value>
+                <elementReference>Identify_Pain_Input</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Champion__c</field>
+            <value>
+                <elementReference>Champion_Input</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>MEDDIC_Score__c</field>
+            <value>
+                <elementReference>MeddicCompletionPct</elementReference>
+            </value>
+        </inputAssignments>
+    </recordUpdates>
+    <screens>
+        <name>Screen_1_Economic_Buyer_Metrics</name>
+        <label>경제적 구매자 &amp; 지표</label>
+        <locationX>176</locationX>
+        <locationY>140</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <fields>
+            <name>Metrics_Input</name>
+            <dataType>String</dataType>
+            <fieldText>고객이 측정하는 성공 지표는 무엇인가요?</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <helpText>&lt;p&gt;예) 기술자 배정 시간 30% 단축, 월 운영비 $10K 절감&lt;/p&gt;</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Economic_Buyer_Input</name>
+            <dataType>String</dataType>
+            <fieldText>최종 예산 승인권자는 누구인가요?</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>&lt;p&gt;이름, 직책, 연락처를 입력하세요&lt;/p&gt;</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <connector>
+            <targetReference>Screen_2_Decision_Pain</targetReference>
+        </connector>
+    </screens>
+    <screens>
+        <name>Screen_2_Decision_Pain</name>
+        <label>의사결정 프로세스 &amp; 페인</label>
+        <locationX>176</locationX>
+        <locationY>340</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <fields>
+            <name>Decision_Criteria_Input</name>
+            <dataType>String</dataType>
+            <fieldText>고객의 솔루션 선택 기준은 무엇인가요?</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Decision_Process_Input</name>
+            <dataType>String</dataType>
+            <fieldText>내부 의사결정 프로세스와 타임라인을 설명해주세요</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Identify_Pain_Input</name>
+            <dataType>String</dataType>
+            <fieldText>고객이 겪는 핵심 문제는 무엇인가요?</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <helpText>&lt;p&gt;비즈니스 임팩트와 함께 기술하세요&lt;/p&gt;</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <connector>
+            <targetReference>Screen_3_Champion_Summary</targetReference>
+        </connector>
+    </screens>
+    <screens>
+        <name>Screen_3_Champion_Summary</name>
+        <label>챔피언 &amp; 완성도 확인</label>
+        <locationX>176</locationX>
+        <locationY>540</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>true</allowPause>
+        <fields>
+            <name>Champion_Input</name>
+            <dataType>String</dataType>
+            <fieldText>내부 챔피언(지지자)은 누구인가요?</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Completeness_Display</name>
+            <fieldText>&lt;p&gt;완성도: {!FilledFieldsCount} / 6 개 필드 입력됨 ({!MeddicCompletionPct}%)&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <connector>
+            <targetReference>Update_Opportunity</targetReference>
+        </connector>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Screen_1_Economic_Buyer_Metrics</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>
