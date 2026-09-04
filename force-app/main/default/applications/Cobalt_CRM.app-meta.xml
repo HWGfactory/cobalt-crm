@@ -20,6 +20,8 @@
     <tabs>standard-Opportunity</tabs>
     <tabs>standard-Account</tabs>
     <tabs>standard-Contract</tabs>
+    <tabs>standard-Case</tabs>
+    <tabs>standard-Entitlement</tabs>
     <tabs>Pilot__c</tabs>
     <tabs>Integration_Log__c</tabs>
     <tabs>standard-Dashboard</tabs>
