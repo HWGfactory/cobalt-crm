@@ -32,6 +32,14 @@ Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmen
 
 작업이 끝난 뒤에는 InvoiceGenerationService가 Invoice__c를 만들고 PaymentCalloutQueueable이 결제를 트리거합니다. 부품 재고가 재주문 기준 아래로 떨어지면 Part_Reorder__e 플랫폼 이벤트가 발행되고 ERPInventorySyncService가 이를 받아 처리합니다. 경로, 날씨, 재고, ERP, 결제, 이 다섯 개의 외부 시스템과 주고받은 요청과 응답은 전부 Integration_Log__c에 남아서, 나중에 무슨 일이 있었는지 추적할 수 있습니다.
 
+## Service Cloud 확장 영역
+
+계약을 맺고 현장 작업까지 이어지는 흐름을 만들고 나니, 그 반대 방향의 흐름이 비어 있었습니다. 고객이 설비 문제를 먼저 알려오는 경우입니다. 이 부분을 표준 Case 오브젝트로 확장해서, 문의 접수부터 현장 작업 전환, 계약 등급별 SLA 관리까지 이어지도록 만들었습니다.
+
+Case에는 문의 유형(Case_Category__c)과 현장 방문 필요 여부(Requires_Field_Visit__c), 그리고 어느 서비스 계약의 SLA를 따라야 하는지를 나타내는 Service_Contract__c 필드를 추가했습니다. 담당자가 Requires_Field_Visit__c를 체크하는 순간이 두 영역을 잇는 지점입니다. CaseToWorkOrderService가 그 계약 아래 새 Work Order를 만들면서 Case의 우선순위와 문의 유형에 맞는 기술자 스킬을 그대로 승계시키고, 그 Work Order가 insert되는 순간 이미 만들어져 있던 WorkOrderTriggerHandler와 TechnicianAssignmentService가 자동으로 반응해 기술자를 배정합니다. Case 쪽 코드는 기술자 배정 로직을 전혀 호출하지 않는데도 그 결과가 이어지는 구조입니다.
+
+Cobalt는 Enterprise, Pro, Starter 세 등급으로 계약을 팔지만 실제로는 모든 문의를 같은 속도로 처리하고 있었습니다. 이 격차는 Salesforce의 Entitlement Management로 메웠습니다. Case가 생성되면 CaseEntitlementService가 연결된 계약의 등급을 읽어 그에 맞는 Entitlement Process(Cobalt Enterprise/Pro/Starter SLA)를 연결하고, 그 순간부터는 Apex가 아니라 플랫폼이 Business Hours를 반영해 최초 응답과 해결까지의 마일스톤을 스스로 추적합니다. 최초 응답 목표 시간을 넘기면 Case가 자동으로 Escalated 상태로 바뀌고 매니저에게 이메일이 발송됩니다.
+
 ## 주요 기능
 
 - 리드 스코어링과 자동 배분
@@ -56,6 +64,10 @@ Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmen
 
 - 청구서 생성과 결제 콜아웃
 
+- 고객 문의(Case) 접수와 현장 작업 자동 전환
+
+- 계약 등급별 SLA 관리(Entitlement Process, Milestone)와 위반 시 자동 에스컬레이션
+
 ## 사용한 기술
 
 - Apex (트리거, 서비스 클래스, Queueable, Batch, REST 리소스)
@@ -67,6 +79,8 @@ Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmen
 - Platform Event
 
 - Named Credential을 통한 외부 REST 연동
+
+- Entitlement Management (Milestone Type, Entitlement Process)
 
 - Apex 단위 테스트와 Jest
 
@@ -85,6 +99,10 @@ force-app/main/default/
   permissionsets/, profiles/, roles/  권한과 조직 구조
   namedCredentials/ 외부 API 연동 설정 (엔드포인트는 플레이스홀더로 대체되어 있습니다)
   dashboards/, reports/  영업 현황 리포트와 대시보드
+  milestoneTypes/, entitlementProcesses/  계약 등급별 SLA 마일스톤과 목표 시간
+  standardValueSets/  Case Status 등 표준 필드의 값 집합 확장
+  settings/           Entitlement Management 등 조직 기능 설정
+  email/              승인·SLA 위반 알림에 쓰이는 이메일 템플릿
 scripts/            데모 데이터 시딩과 정리에 쓴 Apex, SOQL 스크립트
 ```
 
