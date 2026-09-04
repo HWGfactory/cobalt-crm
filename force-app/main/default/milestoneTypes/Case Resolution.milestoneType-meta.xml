@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MilestoneType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Case가 종결(Closed)되기까지 걸리는 시간을 측정하는 마일스톤. 계약 등급(Enterprise/Pro/Starter)별 목표 시간은 각 Entitlement Process에서 따로 정의한다.</description>
+    <recurrenceType>none</recurrenceType>
+</MilestoneType>

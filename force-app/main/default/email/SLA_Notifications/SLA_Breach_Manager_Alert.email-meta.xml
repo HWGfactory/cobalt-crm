@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>SLA Breach Manager Alert</name>
+    <style>none</style>
+    <subject>[SLA 위반] {!Case.CaseNumber} 최초 응답 목표 시간 초과</subject>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

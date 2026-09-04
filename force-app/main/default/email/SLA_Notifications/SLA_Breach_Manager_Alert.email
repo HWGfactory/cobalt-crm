@@ -1,0 +1,8 @@
+Case {!Case.CaseNumber}({!Case.Subject})가 최초 응답(First Response) SLA 목표 시간을 초과했습니다.
+
+담당자: {!Case.Owner.Name}
+고객사: {!Case.Account.Name}
+우선순위: {!Case.Priority}
+현재 상태: {!Case.Status}
+
+즉시 확인하여 고객에게 응답하고, 필요하면 담당자를 재배정하세요.
