@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Closed_Won_ACV_L12M__c</fullName>
+    <label>Closed Won ACV (Last 12 Months)</label>
+    <description>최근 12개월(CloseDate 기준 rolling) 동안 Closed Won 처리된 Opportunity의 ACV 합계. OpportunityAccountRollupHandler가 자동 계산.</description>
+    <type>Currency</type>
+    <precision>18</precision>
+    <scale>2</scale>
+    <required>false</required>
+    <defaultValue>0</defaultValue>
+</CustomField>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Warehouse__c</fullName>
+    <description>보관 창고 위치</description>
+    <label>Warehouse</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>North Warehouse</fullName>
+                <default>false</default>
+                <label>North Warehouse</label>
+            </value>
+            <value>
+                <fullName>South Warehouse</fullName>
+                <default>false</default>
+                <label>South Warehouse</label>
+            </value>
+            <value>
+                <fullName>East Warehouse</fullName>
+                <default>false</default>
+                <label>East Warehouse</label>
+            </value>
+            <value>
+                <fullName>West Warehouse</fullName>
+                <default>false</default>
+                <label>West Warehouse</label>
+            </value>
+            <value>
+                <fullName>Central Warehouse</fullName>
+                <default>false</default>
+                <label>Central Warehouse</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

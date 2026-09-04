@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_Opportunity__c</fullName>
+    <label>Source Opportunity</label>
+    <description>이 계약을 성사시킨 원본 Opportunity (Closed Won 딜)</description>
+    <type>Lookup</type>
+    <referenceTo>Opportunity</referenceTo>
+    <relationshipName>Source_Contracts</relationshipName>
+    <relationshipLabel>Contracts (Source Opportunity)</relationshipLabel>
+    <required>false</required>
+    <deleteConstraint>SetNull</deleteConstraint>
+</CustomField>

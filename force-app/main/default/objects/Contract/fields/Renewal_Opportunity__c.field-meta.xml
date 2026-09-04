@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Renewal_Opportunity__c</fullName>
+    <label>Renewal Opportunity</label>
+    <description>만료 90일 전 자동 생성된 갱신 Opportunity. 값이 있으면 이미 갱신 딜이 생성된 것으로 간주(중복 생성 방지).</description>
+    <type>Lookup</type>
+    <referenceTo>Opportunity</referenceTo>
+    <relationshipName>Renewal_Contracts</relationshipName>
+    <relationshipLabel>Contracts (Renewal Opportunity)</relationshipLabel>
+    <required>false</required>
+    <deleteConstraint>SetNull</deleteConstraint>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Outdoor__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>현장 작업이 옥외에서 이루어지는지 여부 - true인 작업만 날씨 기반 자동 재조정 대상이 됨</description>
+    <label>Is Outdoor</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

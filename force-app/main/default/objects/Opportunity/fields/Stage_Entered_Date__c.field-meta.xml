@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Stage_Entered_Date__c</fullName>
+    <description>현재 Stage로 진입한 날짜. Stage가 변경될 때마다 트리거로 오늘 날짜로 갱신되며, 병목 탐지 리포트(현재 단계 체류일수)에 사용</description>
+    <label>Stage Entered Date</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackTrending>false</trackTrending>
+    <type>Date</type>
+</CustomField>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SLA_Deadline__c</fullName>
+    <description>계약 SLA 기준 마감 시각</description>
+    <externalId>false</externalId>
+    <label>SLA Deadline</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>
