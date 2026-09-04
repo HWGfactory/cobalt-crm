@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SLA_Breached__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>연결된 서비스 계약의 SLA 기준을 초과했는지 여부</description>
+    <label>SLA Breached</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

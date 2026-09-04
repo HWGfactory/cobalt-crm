@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Requires_Field_Visit__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>현장 방문이 필요한 문의인지 여부. 체크되면 Work Order로 전환된다.</description>
+    <label>Requires Field Visit</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>
