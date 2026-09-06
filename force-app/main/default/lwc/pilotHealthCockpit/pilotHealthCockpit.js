@@ -1,4 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
+import { registerRefreshHandler } from 'lightning/refresh';
 import getCockpitData from '@salesforce/apex/PilotHealthCockpitController.getCockpitData';
 
 const HEALTH_BADGE_CLASS = {
@@ -21,9 +23,16 @@ export default class PilotHealthCockpit extends LightningElement {
     completionPct = 0;
     hasLoaded = false;
     loadError;
+    wiredCockpitResult;
+
+    connectedCallback() {
+        registerRefreshHandler(this, () => refreshApex(this.wiredCockpitResult));
+    }
 
     @wire(getCockpitData, { opportunityId: '$recordId' })
-    wiredCockpit({ data, error }) {
+    wiredCockpit(result) {
+        this.wiredCockpitResult = result;
+        const { data, error } = result;
         this.hasLoaded = true;
         if (data) {
             this.loadError = undefined;
