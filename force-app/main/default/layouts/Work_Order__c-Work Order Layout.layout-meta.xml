@@ -119,6 +119,12 @@
         <fields>Service_Contract__c</fields>
     </miniLayout>
     <relatedLists>
+        <relatedList>Part_Line__c.Work_Order__c</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <relatedList>Invoice__c.Work_Order__c</relatedList>
+    </relatedLists>
+    <relatedLists>
         <fields>TASK.SUBJECT</fields>
         <fields>TASK.WHO_NAME</fields>
         <fields>ACTIVITY.TASK</fields>
