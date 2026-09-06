@@ -116,4 +116,4 @@ force-app/main/default/
 scripts/            데모 데이터 시딩과 정리에 쓴 Apex, SOQL 스크립트
 ```
 
-namedCredentials 안의 endpoint 값은 실제 서비스 주소가 아니라 개발 중 사용한 mock 엔드포인트였기 때문에, 레포에는 `https://TODO-REPLACE-WITH-YOUR-ENDPOINT.example.com`으로 남겨두었습니다. 이 조직을 실제로 배포해서 쓰려면 각자의 엔드포인트로 채워 넣어야 합니다.
+
