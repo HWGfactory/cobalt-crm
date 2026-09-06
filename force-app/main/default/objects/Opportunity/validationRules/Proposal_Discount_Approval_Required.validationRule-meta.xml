@@ -2,10 +2,11 @@
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Proposal_Discount_Approval_Required</fullName>
     <active>true</active>
-    <description>Proposal/Negotiation 단계에서 할인율 15% 초과 시 승인 없이 진입 불가. 주의: Discount_Pct__c(Percent 타입)는 수식 안에서 참조되면 Salesforce가 자동으로 100으로 나눈 소수값(예: 15% -> 0.15)으로 취급하므로, 비교값도 반드시 소수로 써야 한다. 정수 15와 비교하면 조건이 사실상 항상 false가 된다(1500% 초과를 의미하게 됨).</description>
+    <description>Proposal/Negotiation 단계에서 할인율 15% 초과 시 승인(Discount_Approved__c=true) 없이는 진입 불가. Discount_Pct__c는 수식 안에서 100으로 나뉘므로 비교값은 소수(0.15)로 써야 한다.</description>
     <errorConditionFormula>AND(
     ISPICKVAL(StageName, &apos;Proposal/Negotiation&apos;),
-    Discount_Pct__c &gt; 0.15
+    Discount_Pct__c &gt; 0.15,
+    Discount_Approved__c = false
 )</errorConditionFormula>
     <errorDisplayField>Discount_Pct__c</errorDisplayField>
     <errorMessage>할인율이 15%를 초과하는 경우 VP 승인 후 Proposal 단계로 이동할 수 있습니다.</errorMessage>
