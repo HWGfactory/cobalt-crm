@@ -1,7 +1,7 @@
 import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getPhotos from '@salesforce/apex/WorkPhotoGalleryController.getPhotos';
-import savePhotos from '@salesforce/apex/WorkPhotoGalleryController.savePhotos';
+import savePhoto from '@salesforce/apex/WorkPhotoGalleryController.savePhoto';
 
 export default class WorkPhotoGallery extends LightningElement {
     @api recordId;
@@ -76,11 +76,12 @@ export default class WorkPhotoGallery extends LightningElement {
 
     async uploadPendingPhoto(pendingPhoto) {
         try {
-            const saved = await savePhotos({
+            const saved = await savePhoto({
                 workOrderId: this.recordId,
-                photos: [{ fileName: pendingPhoto.fileName, base64Data: pendingPhoto.base64Data }]
+                fileName: pendingPhoto.fileName,
+                base64Data: pendingPhoto.base64Data
             });
-            const savedPhoto = this.toPhotoViewModel(saved[0]);
+            const savedPhoto = this.toPhotoViewModel(saved);
             // 로컬 미리보기(pending) 항목을 서버에 저장된 실제 항목으로 교체한다.
             this.photos = this.photos.map((photo) => (photo.key === pendingPhoto.key ? savedPhoto : photo));
             this.showToast('업로드 완료', pendingPhoto.fileName + ' 저장되었습니다.', 'success');

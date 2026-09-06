@@ -4,11 +4,6 @@ public with sharing class WorkPhotoGalleryController {
         'JPG', 'JPEG', 'PNG', 'GIF', 'BMP', 'WEBP', 'HEIC'
     };
 
-    public class PhotoInput {
-        @AuraEnabled public String fileName;
-        @AuraEnabled public String base64Data;
-    }
-
     public class PhotoInfo {
         @AuraEnabled public Id contentVersionId;
         @AuraEnabled public Id contentDocumentId;
@@ -48,12 +43,12 @@ public with sharing class WorkPhotoGalleryController {
     }
 
     @AuraEnabled
-    public static List<PhotoInfo> savePhotos(Id workOrderId, List<PhotoInput> photos) {
+    public static PhotoInfo savePhoto(Id workOrderId, String fileName, String base64Data) {
         if (workOrderId == null) {
             throw new AuraHandledException('작업 Id가 필요합니다.');
         }
-        if (photos == null || photos.isEmpty()) {
-            throw new AuraHandledException('저장할 사진이 없습니다.');
+        if (String.isBlank(base64Data)) {
+            throw new AuraHandledException('유효한 사진 데이터가 없습니다.');
         }
 
         List<Work_Order__c> workOrders = [
@@ -63,74 +58,52 @@ public with sharing class WorkPhotoGalleryController {
             throw new AuraHandledException('작업을 찾을 수 없습니다.');
         }
 
-        List<ContentVersion> versionsToInsert = new List<ContentVersion>();
-        for (PhotoInput photo : photos) {
-            if (String.isBlank(photo.base64Data)) {
-                continue;
-            }
+        String cleanBase64 = base64Data.contains(',') ? base64Data.substringAfter(',') : base64Data;
 
-            String cleanBase64 = photo.base64Data.contains(',')
-                ? photo.base64Data.substringAfter(',')
-                : photo.base64Data;
-
-            Blob photoBlob;
-            try {
-                photoBlob = EncodingUtil.base64Decode(cleanBase64);
-            } catch (Exception ex) {
-                throw new AuraHandledException('사진 데이터를 디코딩할 수 없습니다: ' + photo.fileName);
-            }
-
-            String fileName = String.isNotBlank(photo.fileName)
-                ? photo.fileName
-                : ('Photo_' + Datetime.now().getTime() + '.jpg');
-
-            versionsToInsert.add(new ContentVersion(
-                Title = fileName,
-                PathOnClient = fileName,
-                VersionData = photoBlob,
-                ContentLocation = 'S'
-            ));
-        }
-
-        if (versionsToInsert.isEmpty()) {
-            throw new AuraHandledException('유효한 사진 데이터가 없습니다.');
-        }
-
+        Blob photoBlob;
         try {
-            insert versionsToInsert;
+            photoBlob = EncodingUtil.base64Decode(cleanBase64);
+        } catch (Exception ex) {
+            throw new AuraHandledException('사진 데이터를 디코딩할 수 없습니다: ' + fileName);
+        }
+
+        String resolvedFileName = String.isNotBlank(fileName)
+            ? fileName
+            : ('Photo_' + Datetime.now().getTime() + '.jpg');
+
+        ContentVersion version = new ContentVersion(
+            Title = resolvedFileName,
+            PathOnClient = resolvedFileName,
+            VersionData = photoBlob,
+            ContentLocation = 'S'
+        );
+        try {
+            insert version;
         } catch (DmlException ex) {
             throw new AuraHandledException('사진 저장 중 오류가 발생했습니다: ' + ex.getMessage());
         }
 
-        Set<Id> versionIds = new Map<Id, ContentVersion>(versionsToInsert).keySet();
-        Map<Id, ContentVersion> insertedVersions = new Map<Id, ContentVersion>([
+        ContentVersion inserted = [
             SELECT Id, ContentDocumentId, Title, CreatedDate
             FROM ContentVersion
-            WHERE Id IN :versionIds
+            WHERE Id = :version.Id
             WITH USER_MODE
-        ]);
+            LIMIT 1
+        ];
 
-        List<ContentDocumentLink> links = new List<ContentDocumentLink>();
-        for (ContentVersion cv : insertedVersions.values()) {
-            links.add(new ContentDocumentLink(
-                ContentDocumentId = cv.ContentDocumentId,
-                LinkedEntityId = workOrderId,
-                ShareType = 'V',
-                Visibility = 'AllUsers'
-            ));
-        }
-
+        ContentDocumentLink link = new ContentDocumentLink(
+            ContentDocumentId = inserted.ContentDocumentId,
+            LinkedEntityId = workOrderId,
+            ShareType = 'V',
+            Visibility = 'AllUsers'
+        );
         try {
-            insert links;
+            insert link;
         } catch (DmlException ex) {
             throw new AuraHandledException('사진을 작업에 연결하는 중 오류가 발생했습니다: ' + ex.getMessage());
         }
 
-        List<PhotoInfo> results = new List<PhotoInfo>();
-        for (ContentVersion cv : insertedVersions.values()) {
-            results.add(toPhotoInfo(cv.Id, cv.ContentDocumentId, cv.Title, cv.CreatedDate));
-        }
-        return results;
+        return toPhotoInfo(inserted.Id, inserted.ContentDocumentId, inserted.Title, inserted.CreatedDate);
     }
 
     private static PhotoInfo toPhotoInfo(Id contentVersionId, Id contentDocumentId, String title, Datetime createdDate) {

@@ -135,12 +135,7 @@ private class FullLifecycleIntegrationTest {
         // ── 5. 현장 사진 첨부 ──
         String samplePngBase64 =
             'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
-        WorkPhotoGalleryController.PhotoInput photoInput = new WorkPhotoGalleryController.PhotoInput();
-        photoInput.fileName = 'before-after.png';
-        photoInput.base64Data = samplePngBase64;
-        WorkPhotoGalleryController.savePhotos(
-            serviceCall.Id, new List<WorkPhotoGalleryController.PhotoInput>{ photoInput }
-        );
+        WorkPhotoGalleryController.savePhoto(serviceCall.Id, 'before-after.png', samplePngBase64);
 
         // ── 6. 고객 서명 + 체크리스트 완료 -> Completed -> 청구서 생성 + 결제 + 완료 알림 ──
         FieldCompletionController.saveSignature(serviceCall.Id, samplePngBase64);

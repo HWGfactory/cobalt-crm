@@ -16,34 +16,23 @@ private class WorkPhotoGalleryControllerTest {
     }
 
     @IsTest
-    static void testSavePhotos_createsContentVersionsLinkedToWorkOrder() {
+    static void testSavePhoto_createsContentVersionLinkedToWorkOrder() {
         Work_Order__c wo = createWorkOrder();
 
-        WorkPhotoGalleryController.PhotoInput photo1 = new WorkPhotoGalleryController.PhotoInput();
-        photo1.fileName = 'site-photo-1.png';
-        photo1.base64Data = SAMPLE_PNG_DATA_URI;
-
-        WorkPhotoGalleryController.PhotoInput photo2 = new WorkPhotoGalleryController.PhotoInput();
-        photo2.fileName = 'site-photo-2.png';
-        photo2.base64Data = SAMPLE_PNG_DATA_URI;
-
         Test.startTest();
-        List<WorkPhotoGalleryController.PhotoInfo> results = WorkPhotoGalleryController.savePhotos(
-            wo.Id, new List<WorkPhotoGalleryController.PhotoInput>{ photo1, photo2 }
+        WorkPhotoGalleryController.PhotoInfo result = WorkPhotoGalleryController.savePhoto(
+            wo.Id, 'site-photo-1.png', SAMPLE_PNG_DATA_URI
         );
         Test.stopTest();
 
-        System.assertEquals(2, results.size());
-        for (WorkPhotoGalleryController.PhotoInfo info : results) {
-            System.assertNotEquals(null, info.contentVersionId);
-            System.assertNotEquals(null, info.contentDocumentId);
-            System.assert(info.thumbnailUrl.contains(String.valueOf(info.contentVersionId)));
-            System.assert(info.fullUrl.contains(String.valueOf(info.contentVersionId)));
-        }
+        System.assertNotEquals(null, result.contentVersionId);
+        System.assertNotEquals(null, result.contentDocumentId);
+        System.assert(result.thumbnailUrl.contains(String.valueOf(result.contentVersionId)));
+        System.assert(result.fullUrl.contains(String.valueOf(result.contentVersionId)));
 
         System.assertEquals(
-            2, [SELECT COUNT() FROM ContentDocumentLink WHERE LinkedEntityId = :wo.Id],
-            '저장된 사진 수만큼 Work Order에 파일이 연결되어야 함'
+            1, [SELECT COUNT() FROM ContentDocumentLink WHERE LinkedEntityId = :wo.Id],
+            '저장된 사진이 Work Order에 연결되어야 함'
         );
     }
 
@@ -51,10 +40,7 @@ private class WorkPhotoGalleryControllerTest {
     static void testGetPhotos_returnsOnlyImageFilesOrderedByNewest() {
         Work_Order__c wo = createWorkOrder();
 
-        WorkPhotoGalleryController.PhotoInput photo = new WorkPhotoGalleryController.PhotoInput();
-        photo.fileName = 'image.png';
-        photo.base64Data = SAMPLE_PNG_DATA_URI;
-        WorkPhotoGalleryController.savePhotos(wo.Id, new List<WorkPhotoGalleryController.PhotoInput>{ photo });
+        WorkPhotoGalleryController.savePhoto(wo.Id, 'image.png', SAMPLE_PNG_DATA_URI);
 
         // 이미지가 아닌 파일도 같은 작업에 연결해 필터링되는지 검증한다.
         ContentVersion textVersion = new ContentVersion(
@@ -107,15 +93,11 @@ private class WorkPhotoGalleryControllerTest {
     }
 
     @IsTest
-    static void testSavePhotos_missingWorkOrderThrows() {
-        WorkPhotoGalleryController.PhotoInput photo = new WorkPhotoGalleryController.PhotoInput();
-        photo.fileName = 'photo.png';
-        photo.base64Data = SAMPLE_PNG_DATA_URI;
-
+    static void testSavePhoto_missingWorkOrderIdThrows() {
         Boolean threw = false;
         Test.startTest();
         try {
-            WorkPhotoGalleryController.savePhotos(null, new List<WorkPhotoGalleryController.PhotoInput>{ photo });
+            WorkPhotoGalleryController.savePhoto(null, 'photo.png', SAMPLE_PNG_DATA_URI);
         } catch (AuraHandledException ex) {
             threw = true;
         }
@@ -124,13 +106,13 @@ private class WorkPhotoGalleryControllerTest {
     }
 
     @IsTest
-    static void testSavePhotos_emptyListThrows() {
-        Work_Order__c wo = createWorkOrder();
+    static void testSavePhoto_missingWorkOrderThrows() {
+        Id bogusId = Id.valueOf('a05000000000000AAA');
 
         Boolean threw = false;
         Test.startTest();
         try {
-            WorkPhotoGalleryController.savePhotos(wo.Id, new List<WorkPhotoGalleryController.PhotoInput>());
+            WorkPhotoGalleryController.savePhoto(bogusId, 'photo.png', SAMPLE_PNG_DATA_URI);
         } catch (AuraHandledException ex) {
             threw = true;
         }
@@ -139,21 +121,17 @@ private class WorkPhotoGalleryControllerTest {
     }
 
     @IsTest
-    static void testSavePhotos_blankBase64ItemsAreSkippedAndAllBlankThrows() {
+    static void testSavePhoto_blankBase64Throws() {
         Work_Order__c wo = createWorkOrder();
-
-        WorkPhotoGalleryController.PhotoInput blankPhoto = new WorkPhotoGalleryController.PhotoInput();
-        blankPhoto.fileName = 'empty.png';
-        blankPhoto.base64Data = '';
 
         Boolean threw = false;
         Test.startTest();
         try {
-            WorkPhotoGalleryController.savePhotos(wo.Id, new List<WorkPhotoGalleryController.PhotoInput>{ blankPhoto });
+            WorkPhotoGalleryController.savePhoto(wo.Id, 'empty.png', '');
         } catch (AuraHandledException ex) {
             threw = true;
         }
         Test.stopTest();
-        System.assert(threw, '유효한 사진 데이터가 하나도 없으면 예외가 발생해야 함');
+        System.assert(threw, '유효한 사진 데이터가 없으면 예외가 발생해야 함');
     }
 }
