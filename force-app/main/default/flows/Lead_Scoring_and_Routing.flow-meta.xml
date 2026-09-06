@@ -28,12 +28,12 @@
         <name>Assign_Senior_Owner</name>
         <label>Assign Senior Owner</label>
         <locationX>176</locationX>
-        <locationY>440</locationY>
+        <locationY>540</locationY>
         <assignmentItems>
             <assignToReference>$Record.OwnerId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue>005g8000007UIzoAAG</stringValue>
+                <elementReference>Get_Senior_Rep_Queue.Id</elementReference>
             </value>
         </assignmentItems>
     </assignments>
@@ -41,12 +41,12 @@
         <name>Assign_Rep_Owner</name>
         <label>Assign Rep Owner</label>
         <locationX>376</locationX>
-        <locationY>440</locationY>
+        <locationY>540</locationY>
         <assignmentItems>
             <assignToReference>$Record.OwnerId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue>005g8000008HudBAAS</stringValue>
+                <elementReference>Get_Rep_Queue.Id</elementReference>
             </value>
         </assignmentItems>
     </assignments>
@@ -56,7 +56,7 @@
         <locationX>176</locationX>
         <locationY>340</locationY>
         <defaultConnector>
-            <targetReference>Assign_Rep_Owner</targetReference>
+            <targetReference>Get_Rep_Queue</targetReference>
         </defaultConnector>
         <defaultConnectorLabel>Below 70 (2nd/3rd Rep)</defaultConnectorLabel>
         <rules>
@@ -70,11 +70,67 @@
                 </rightValue>
             </conditions>
             <connector>
-                <targetReference>Assign_Senior_Owner</targetReference>
+                <targetReference>Get_Senior_Rep_Queue</targetReference>
             </connector>
             <label>70 or More (Senior Rep)</label>
         </rules>
     </decisions>
+    <recordLookups>
+        <name>Get_Senior_Rep_Queue</name>
+        <label>Get Senior Rep Queue</label>
+        <locationX>176</locationX>
+        <locationY>440</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Assign_Senior_Owner</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Type</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Queue</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>DeveloperName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Senior_Rep_Queue</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Group</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_Rep_Queue</name>
+        <label>Get Rep Queue</label>
+        <locationX>376</locationX>
+        <locationY>440</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Assign_Rep_Owner</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Type</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Queue</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>DeveloperName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Rep_Queue</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Group</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <formulas>
         <name>CompanySizeScore</name>
         <dataType>Number</dataType>
