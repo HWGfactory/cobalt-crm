@@ -1,7 +1,8 @@
 public with sharing class TechnicianAssignmentService {
 
-    @TestVisible private static final Decimal WEIGHT_SKILL = 0.3;
-    @TestVisible private static final Decimal WEIGHT_WORKLOAD = 0.3;
+    // 스킬/거리/업무량 가중치는 실제 스코어링 계산이 일어나는 RouteCalloutService 한 곳에만
+    // 둔다. 이전에는 이 클래스에도 같은 값을 복제해뒀는데, 여기서는 실제로 쓰이지 않는 죽은
+    // 상수였고 두 곳을 따로 관리하면 한쪽만 바꿨을 때 조용히 어긋날 위험이 있었다.
     @TestVisible private static final Decimal MAX_WORKLOAD_ORDERS = 10;
     @TestVisible private static final Integer SCHEDULE_BUFFER_MINUTES = 120;
 
