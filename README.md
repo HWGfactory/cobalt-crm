@@ -20,19 +20,21 @@ Cobalt 같은 회사에서 CRM은 흔히 두 개로 쪼개져서 따로 돕니�
 
 Cobalt의 영업팀이 겪는 문제는 두 가지였습니다. 하나는 딜이 준비되지 않은 채로 다음 단계로 넘어가는 것이고, 다른 하나는 할인이 통제 없이 나가는 것입니다.
 
-첫 번째 문제는 Opportunity의 단계 전환 자체에 조건을 걸어서 풀었습니다. Discovery 단계를 벗어나려면 MEDDIC 자격 검증 점수가 채워져 있어야 하고, Closed Lost 처리에는 사유가, Closed Won 처리에는 계약서 검토가 필수입니다. MEDDIC_Qualification_Screen_Flow가 그 점수를 입력받는 화면이고, 다섯 개의 Validation Rule이 각 단계의 게이트 역할을 합니다.
+첫 번째 문제는 Opportunity의 단계 전환 자체에 조건을 걸어서 풀었습니다. Discovery 단계를 벗어나려면 MEDDIC 자격 검증 점수가 채워져 있어야 하고, Proposal 단계로 넘어가려면 연결된 Pilot 레코드가 있어야 하며, Closed Lost 처리에는 사유가, Closed Won 처리에는 계약서 검토가 필수입니다. MEDDIC_Qualification_Screen_Flow가 그 점수를 입력받는 화면이고, 네 개의 Validation Rule과 Apex 트리거 하나가 각 단계의 게이트 역할을 합니다. Pilot 존재 여부처럼 다른 오브젝트를 조회해야 알 수 있는 조건은 Validation Rule로 표현할 수 없어서 Apex를 썼습니다.
 
 두 번째 문제는 할인 승인 프로세스로 풀었습니다. Proposal 단계에서 할인율이 15퍼센트를 넘으면 VP의 승인 없이는 그 단계로 들어갈 수 없습니다. Cobalt_Discount_Approval 승인 프로세스가 이 흐름을 처리하고, 승인이나 반려가 나면 이메일로 담당자에게 자동으로 알립니다.
 
-그 앞단에서는 Lead_Scoring_and_Routing이 들어온 리드를 점수로 나눠 담당자에게 배분하고, Account에는 최근 12개월 매출과 오픈 파이프라인 합계가 롤업되어서 영업 담당자가 계정 단위로 상태를 바로 볼 수 있습니다. 큰 계약 전에는 Pilot__c로 소규모 시범 운영을 먼저 돌리는데, Pilot_AtRisk_Alert과 Pilot_EndDate_Reminder가 파일럿이 위험 상태이거나 종료일이 다가올 때 담당자에게 알려줍니다.
+그 앞단에서는 Lead_Scoring_and_Routing이 들어온 리드를 점수로 나눠 담당자에게 배분하고, Account에는 최근 12개월 매출과 오픈 파이프라인 합계가 롤업되어서 영업 담당자가 계정 단위로 상태를 바로 볼 수 있습니다. 큰 계약 전에는 Pilot__c로 소규모 시범 운영을 먼저 돌리는데, Pilot_AtRisk_Alert과 Pilot_EndDate_Reminder가 파일럿이 위험 상태이거나 종료일이 다가올 때 담당자에게 알려주고, Opportunity 화면의 Pilot Health Cockpit 위젯에서 MEDDIC 완성도와 파일럿 진행 상태를 한 번에 확인할 수 있습니다.
+
+계약이 체결된 뒤에도 영업의 일은 끝나지 않습니다. Contract_Renewal_Reminder가 만료 90/60/30일 전 담당자에게 갱신을 상기시키고, 90일 전 시점에는 원래 계약 금액을 그대로 승계한 갱신용 Opportunity를 자동으로 만들어 영업이 다시 처음부터 준비할 필요가 없게 합니다.
 
 ## 현장 서비스 실행 영역
 
 Pilot이 통과하거나 계약이 성사되면 Service_Contract__c가 만들어집니다. 이 서비스 계약 안에서 실제 작업 단위인 Work_Order__c가 여러 건 생기고, 하나의 Work Order는 Technician__c(배정된 기술자), Part_Line__c(사용한 부품과 수량)와 연결됩니다. 그래서 한 번의 출동에 누가, 무엇을, 얼마나 썼는지가 그대로 남습니다.
 
-Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmentBatch가 조건에 맞는 기술자를 찾아 배정합니다. 배정이 안 된 건은 Dispatcher_Queue로 모이고, dispatcherBoard LWC에서 디스패처가 직접 배정할 수 있습니다. 작업 중에는 slaCountdown이 SLA 마감까지 남은 시간을 보여주고, WeatherRescheduleService가 날씨 때문에 일정을 조정해야 하는 경우를 처리합니다. 작업이 끝나면 fieldCompletion과 workPhotoGallery로 완료 처리와 현장 사진 업로드가 이루어집니다.
+Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmentBatch가 조건에 맞는 기술자를 찾아 배정합니다. 배정이 안 된 건은 Dispatcher_Queue로 모이고, dispatcherBoard LWC에서 디스패처가 직접 배정할 수 있습니다. 작업 중에는 slaCountdown이 SLA 마감까지 남은 시간을 보여주고, WeatherRescheduleService가 날씨 때문에 일정을 조정해야 하는 경우를 처리합니다. 상태가 출동, 현장 도착, 완료로 바뀔 때마다 SendCustomerNotification이 고객에게 자동으로 문자 알림을 보냅니다. 작업이 끝나면 fieldCompletion과 workPhotoGallery로 완료 처리와 현장 사진 업로드가 이루어집니다.
 
-작업이 끝난 뒤에는 InvoiceGenerationService가 Invoice__c를 만들고 PaymentCalloutQueueable이 결제를 트리거합니다. 부품 재고가 재주문 기준 아래로 떨어지면 Part_Reorder__e 플랫폼 이벤트가 발행되고 ERPInventorySyncService가 이를 받아 처리합니다. 경로, 날씨, 재고, ERP, 결제, 이 다섯 개의 외부 시스템과 주고받은 요청과 응답은 전부 Integration_Log__c에 남아서, 나중에 무슨 일이 있었는지 추적할 수 있습니다.
+작업이 끝난 뒤에는 InvoiceGenerationService가 Invoice__c를 만들고 PaymentCalloutQueueable이 결제를 트리거합니다. 부품 재고가 재주문 기준 아래로 떨어지면 Part_Reorder__e 플랫폼 이벤트가 발행되고 ERPInventorySyncService가 이를 받아 처리합니다. 경로, 결제, 고객 알림, 날씨, 재고 ERP, 이 다섯 개의 외부 시스템과 주고받은 요청과 응답은 전부 Integration_Log__c에 남아서, 나중에 무슨 일이 있었는지 추적할 수 있습니다.
 
 ## Service Cloud 확장 영역
 
@@ -52,15 +54,21 @@ Cobalt는 Enterprise, Pro, Starter 세 등급으로 계약을 팔지만 실제�
 
 - 파일럿 관리와 위험 상태 알림, 유료 전환 추적
 
+- MEDDIC 완성도와 파일럿 현황을 한눈에 보는 Pilot Health Cockpit
+
+- 계약 만료 임박 알림과 원본 금액을 승계한 자동 갱신 Opportunity 생성
+
 - Opportunity Closed Won 시 서비스 계약 자동 생성
 
 - 기술자 배정 엔진과 디스패처 보드
 
 - SLA 마감 추적과 날씨 기반 일정 재조정
 
+- 작업 상태 변경 시 고객 자동 알림
+
 - 부품 사용 내역 기록과 재고 재주문 연동
 
-- 경로, 날씨, 재고, ERP, 결제 외부 API 연동과 호출 로그
+- 경로, 결제, 고객 알림, 날씨, 재고 ERP 외부 API 연동과 호출 로그
 
 - 작업 완료 처리와 현장 사진 업로드
 
