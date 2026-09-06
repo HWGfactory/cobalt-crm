@@ -1,6 +1,8 @@
 public with sharing class WeatherRescheduleService implements Database.Batchable<SObject>, Database.AllowsCallouts, Schedulable {
 
     private static final String NAMED_CREDENTIAL = 'Cobalt_Weather_API';
+    // 이 확률(%) 이상의 강수 예보면 현장 작업 일정을 재조정한다. 아직 실제 운영 기준이
+    // 확정되지 않은 잠정값이라 상수로 두었다.
     @TestVisible private static final Decimal PRECIPITATION_THRESHOLD_PCT = 70;
     private static final Set<String> ACTIVE_STATUSES = new Set<String>{
         'New', 'Assigned', 'En Route', 'On Site'

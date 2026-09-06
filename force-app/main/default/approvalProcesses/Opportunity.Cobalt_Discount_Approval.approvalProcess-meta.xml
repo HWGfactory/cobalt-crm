@@ -2,6 +2,22 @@
 <ApprovalProcess xmlns="http://soap.sforce.com/2006/04/metadata">
     <active>true</active>
     <allowRecall>true</allowRecall>
+    <!--
+        두 승인 단계 모두 특정 사용자(user) 이메일로 고정되어 있다. Role이나 Queue로 바꾸는
+        방안을 검토했으나 둘 다 플랫폼 제약으로 이 오브젝트에는 쓸 수 없었다.
+        - type=role은 Salesforce Approver 타입에 아예 존재하지 않는다(유효 값은
+          adhoc/user/userHierarchyField/relatedUserField/queue뿐).
+        - type=queue는 존재하지만 Opportunity는 Queue가 레코드를 소유할 수 있는
+          오브젝트 목록에 없다(Queue의 sobjectType 제한 picklist에 Opportunity 자체가
+          없어 배포 단계에서 거부됨). Salesforce IdeaExchange에도 이 기능을 요청하는
+          미해결 아이디어가 등록되어 있을 만큼 플랫폼 자체의 한계다.
+        남은 대안은 relatedUserField/userHierarchyField로 Opportunity Owner의 매니저
+        체인을 타는 것인데, 이러려면 조직 내 여러 사용자의 User.ManagerId를 실제 보고
+        체계에 맞게 먼저 세팅해야 한다. 이건 코드 변경이 아니라 조직 인사 구조를 결정하는
+        일이라 이번 범위에서는 손대지 않았다. 담당자가 바뀌면 이 두 이메일을 함께
+        갱신해야 한다는 점을 반드시 기억할 것.
+    -->
+
     <allowedSubmitters>
         <type>owner</type>
     </allowedSubmitters>

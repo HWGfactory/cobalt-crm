@@ -13,6 +13,7 @@ public with sharing class PaymentCalloutQueueable implements Queueable, Database
     }
 
     private static final String NAMED_CREDENTIAL = 'Cobalt_Payment_API';
+    // 결제 API 재시도 최대 횟수. 벤더 SLA에 맞춰 조정할 값이라 상수로 유지 중이다.
     @TestVisible private static final Integer MAX_RETRY_COUNT = 3;
     // Salesforce 콜아웃 한도(트랜잭션당 100회)에 안전 마진을 두고 청구 요청을 배치로 나눠 처리한다.
     @TestVisible private static final Integer MAX_CALLOUTS_PER_EXECUTION = 50;

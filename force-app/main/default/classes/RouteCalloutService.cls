@@ -26,6 +26,8 @@ public with sharing class RouteCalloutService implements Queueable, Database.All
     public class RouteParseException extends Exception {}
     public class RouteCalloutException extends Exception {}
 
+    // 배정 스코어링 가중치(합이 1이 되도록 맞춰져 있음). 실제 배정 결과를 보면서 튜닝할
+    // 값이라 상수로 남겨뒀다. 다른 클래스에 같은 값을 복제하지 말고 이 파일에서만 관리한다.
     private static final Decimal WEIGHT_DISTANCE = 0.4;
     private static final Decimal WEIGHT_SKILL = 0.3;
     private static final Decimal WEIGHT_WORKLOAD = 0.3;

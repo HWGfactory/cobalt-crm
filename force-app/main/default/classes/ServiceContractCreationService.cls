@@ -1,5 +1,7 @@
 public with sharing class ServiceContractCreationService {
 
+    // 등급별 SLA 목표 시간(시간 단위). 영업 정책이라 자주 바뀌는 값은 아니라고 보고
+    // 상수로 유지 중이다. 등급이나 정책이 잦아지면 Custom Metadata Type 이동을 검토한다.
     @TestVisible private static final Integer SLA_HOURS_STARTER = 48;
     @TestVisible private static final Integer SLA_HOURS_PRO = 24;
     @TestVisible private static final Integer SLA_HOURS_ENTERPRISE = 4;
