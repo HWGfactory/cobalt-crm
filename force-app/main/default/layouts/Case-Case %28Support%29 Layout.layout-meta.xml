@@ -187,6 +187,10 @@
                 <behavior>Edit</behavior>
                 <field>SLA_Breached__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>EntitlementId</field>
+            </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
     </layoutSections>
@@ -311,6 +315,16 @@
     </relatedLists>
     <relatedLists>
         <relatedList>RelatedEntityHistoryList</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <fields>MILESTONETYPE.MILESTONE</fields>
+        <fields>CASEMILESTONE.TARGET_DATE</fields>
+        <fields>CASEMILESTONE.COMPLETION_DATE</fields>
+        <fields>CASEMILESTONE.TIME_REMAIN_MINS</fields>
+        <fields>CASEMILESTONE.IS_VIOLATED_IN</fields>
+        <fields>CASEMILESTONE.IS_COMPLETED_IN</fields>
+        <fields>CASEMILESTONE.IS_PAUSED_IN</fields>
+        <relatedList>RelatedCaseMilestoneList</relatedList>
     </relatedLists>
     <relatedObjects>ContactId</relatedObjects>
     <relatedObjects>AccountId</relatedObjects>
