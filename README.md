@@ -104,7 +104,7 @@ Cobalt는 Enterprise, Pro, Starter 세 등급으로 계약을 팔지만 실제�
 
 - Entitlement Management (Milestone Type, Entitlement Process)
 
-- Apex 단위 테스트와 Jest
+- SOQL
 
 </br>
 
