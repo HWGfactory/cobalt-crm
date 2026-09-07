@@ -117,3 +117,63 @@ scripts/            데모 데이터 시딩과 정리에 쓴 Apex, SOQL 스크�
 ```
 
 namedCredentials 안의 endpoint 값은 실제 서비스 주소가 아니라 개발 중 사용한 mock 엔드포인트였기 때문에, 레포에는 `https://TODO-REPLACE-WITH-YOUR-ENDPOINT.example.com`으로 남겨두었습니다. 이 조직을 실제로 배포해서 쓰려면 각자의 엔드포인트로 채워 넣어야 합니다.
+
+## 트러블슈팅
+
+작업하면서 실제로 막혔던 부분들과, 그걸 어떻게 원인을 찾아서 풀었는지 기록입니다.
+
+### 1. Work Order 사진 갤러리 업로드 실패: "유효한 사진 데이터가 없습니다"
+
+**문제**
+workPhotoGallery LWC에서 현장 사진을 올리면 매번 "유효한 사진 데이터가 없습니다" 오류가 나며 실패했습니다. 브라우저 네트워크 탭으로 요청을 직접 열어봐도 base64 이미지 데이터가 페이로드에 정상적으로 담겨 나가고 있었습니다.
+
+**원인**
+클라이언트가 보내는 데이터는 멀쩡한데 서버(Apex)에서만 비어있다는 뜻이었으므로, LWC → Apex 사이의 역직렬화 구간을 의심했습니다. `XMLHttpRequest.prototype.send`를 임시로 가로채 실제 전송 payload를 확인하고, Apex 쪽에는 `System.debug`를 심어 `sf apex tail log`로 서버가 받은 값을 대조한 결과, imperative Apex 메서드의 파라미터가 `List<PhotoInput>`처럼 커스텀 Apex inner class일 때 필드가 조용히 `null`로 역직렬화되는 것을 확인했습니다. 이미 문제없이 동작하던 `FieldCompletionController.saveSignature`는 `Id`, `String` 같은 단순 타입만 받고 있다는 점에서 원인의 실마리를 잡았습니다.
+
+**해결**
+`savePhotos(Id, List<PhotoInput>)` 시그니처를 버리고, `savePhoto(Id workOrderId, String fileName, String base64Data)`처럼 평평한 기본 타입 파라미터로 바꿔 사진 한 장씩 호출하도록 LWC와 Apex 컨트롤러를 함께 수정했습니다. 관련 Apex 테스트도 새 시그니처에 맞춰 다시 작성했습니다.
+
+### 2. Lead 담당자 배정에 사용자 Id가 하드코딩됨
+
+**문제**
+하드코딩 점검 중 `Lead_Scoring_and_Routing` Flow의 담당자 배정 요소(`Assign_Senior_Owner`/`Assign_Rep_Owner`)에 특정 사용자의 Id가 문자열로 그대로 박혀 있는 것을 발견했습니다. 담당자가 바뀌거나 다른 조직으로 이전하면 이 값들이 전부 깨지는 구조였습니다.
+
+**원인**
+Flow를 처음 만들 때 담당자 배정을 사람의 Id로 직접 지정해서, 조직 구조나 담당자가 바뀔 때마다 Flow 자체를 열어 값을 고쳐야 하는 방식으로 설계되어 있었습니다.
+
+**해결**
+`Senior_Rep_Queue`, `Rep_Queue` 두 개의 Queue를 새로 만들고, Flow 안에 Get Records 요소(`Group` 오브젝트를 `Type='Queue' AND DeveloperName=...`로 조회)를 추가해 실행 시점에 Queue Id를 동적으로 찾도록 바꿨습니다. Before-Save Flow는 레코드 생성/수정 요소는 못 쓰지만 Get Records는 지원한다는 점을 먼저 확인한 뒤 진행했고, 실제 테스트 Lead를 만들어 `OwnerId`가 Queue로 정상 배정되는 것까지 확인했습니다.
+
+### 3. Approval Process 승인자를 Role/Queue로 바꾸려다 플랫폼 제약에 막힘
+
+**문제**
+`Cobalt_Discount_Approval` 승인 프로세스도 승인자가 특정 사용자 이메일로 고정되어 있었습니다. Role이나 Queue 기반으로 바꾸면 담당자가 바뀌어도 승인 프로세스를 건드릴 필요가 없어질 것으로 보고 두 가지를 차례로 시도했습니다.
+
+**원인**
+- 먼저 승인자 타입을 `role`로 배포했더니 "`role`은 유효한 Approver 타입이 아니다"라는 에러가 났습니다. Salesforce 공식 Metadata API 문서를 확인해보니 `Approver.type`에는 애초에 `adhoc`/`user`/`userHierarchyField`/`relatedUserField`/`queue` 다섯 가지만 존재하고 `role`은 없었습니다.
+- 그래서 `type=queue`로 바꾸고 새 Queue(`VP_Sales_Approval_Queue` 등)를 만들었는데, 이번엔 Queue의 `sobjectType`에 `Opportunity`를 넣는 순간 "bad value for restricted picklist field: Opportunity"로 배포가 거부됐습니다. 확인해보니 Opportunity는 애초에 Queue가 소유할 수 있는 오브젝트 목록에 없었고, Salesforce IdeaExchange에도 이 기능을 요청하는 미해결 아이디어가 등록되어 있을 만큼 플랫폼 자체의 한계였습니다.
+
+**해결**
+두 방법 모두 플랫폼 제약으로 막혀 있었기 때문에, 억지로 우회하지 않고 승인자를 원래의 `type=user` 하드코딩 방식으로 되돌렸습니다. 대신 왜 role/queue를 쓸 수 없었는지와, 담당자가 바뀌면 반드시 이 두 이메일을 함께 갱신해야 한다는 점을 승인 프로세스 XML에 주석으로 남겨두었습니다. 새로 만들었던 승인용 Queue 두 개도 다시 정리(삭제)했습니다.
+
+### 4. 메타데이터 배포가 일부만 성공한 것처럼 보이다가 전체 롤백됨
+
+**문제**
+Queue 2개, Flow 수정, Approval Process 수정을 한 번의 배포로 묶어서 올렸는데, 진행 상황에는 "10/11 성공"처럼 표시되다가 최종 결과가 Failed로 끝났고, 이미 성공한 것처럼 보였던 Queue조차 org에 남아있지 않았습니다.
+
+**원인**
+Salesforce Metadata API 배포는 구성요소 하나라도 실패하면 같은 배포 안의 나머지 구성요소까지 전부 롤백되는 all-or-nothing 트랜잭션이기 때문이었습니다. 진행률 표시는 개별 컴포넌트 검증 단계일 뿐, 배포 자체가 원자적으로 커밋되거나 통째로 취소된다는 점을 다시 확인했습니다.
+
+**해결**
+의존관계가 없는 Queue만 먼저 단독으로 배포해 org에 확실히 커밋시킨 뒤, 그 Queue를 참조하는 Flow/Approval Process 변경분은 별도의 두 번째 배포로 나눠서 진행했습니다.
+
+### 5. git push가 응답 없이 멈춤
+
+**문제**
+작업을 커밋한 뒤 `git push`를 실행하면 아무 출력 없이 계속 멈춰 있었고, 이 현상이 여러 차례 반복됐습니다.
+
+**원인**
+`GIT_TRACE=1 GIT_CURL_VERBOSE=1`로 push를 다시 실행해 원격 통신을 추적해보니, 서버가 401을 반환한 직후 Git Credential Manager가 브라우저 기반 대화형 재인증 창을 띄우려고 시도했습니다. 이 작업 환경은 헤드리스라 그 창을 띄우거나 완료할 방법이 없어 그대로 무한 대기 상태에 빠지는 것이었습니다.
+
+**해결**
+코드나 리포지토리 설정으로 고칠 수 있는 문제가 아니었기 때문에, 사용자가 직접 터미널에서 인증을 완료하거나 push를 재시도하도록 안내했습니다. 실제로 재시도만으로 정상적으로 넘어가는 경우가 대부분이었습니다.
