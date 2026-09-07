@@ -10,11 +10,15 @@ Cobalt는 엘리베이터, HVAC, 발전기 같은 산업 설비를 파는 회사
 
 이 레포는 그 두 흐름, 영업 파이프라인과 현장 서비스 실행을 하나의 Salesforce 조직 안에서 이어보려고 만든 프로젝트입니다.
 
+</br>
+
 ## 왜 만들었는가
 
 Cobalt 같은 회사에서 CRM은 흔히 두 개로 쪼개져서 따로 돕니다. 영업은 Salesforce를, 현장은 별도의 필드 서비스 툴을 쓰는 식입니다. 그러다 보니 영업이 약속한 내용과 현장에서 실제로 벌어지는 일 사이에 항상 틈이 생깁니다.
 
 이 프로젝트는 그 틈을 하나의 데이터 모델과 자동화로 메울 수 있는지를 직접 확인해보기 위해 만들었습니다. Opportunity가 Closed Won이 되는 순간 서비스 계약과 작업 지시가 자동으로 생기고, 작업이 끝나면 청구까지 이어지는 흐름을 실제로 동작하는 오브젝트, Apex, Flow로 구현해서 증명하려 했습니다.
+
+</br>
 
 ## 영업 파이프라인 영역
 
@@ -28,6 +32,8 @@ Cobalt의 영업팀이 겪는 문제는 두 가지였습니다. 하나는 딜이
 
 계약이 체결된 뒤에도 영업의 일은 끝나지 않습니다. Contract_Renewal_Reminder가 만료 90/60/30일 전 담당자에게 갱신을 상기시키고, 90일 전 시점에는 원래 계약 금액을 그대로 승계한 갱신용 Opportunity를 자동으로 만들어 영업이 다시 처음부터 준비할 필요가 없게 합니다.
 
+</br>
+
 ## 현장 서비스 실행 영역
 
 Pilot이 통과하거나 계약이 성사되면 Service_Contract__c가 만들어집니다. 이 서비스 계약 안에서 실제 작업 단위인 Work_Order__c가 여러 건 생기고, 하나의 Work Order는 Technician__c(배정된 기술자), Part_Line__c(사용한 부품과 수량)와 연결됩니다. 그래서 한 번의 출동에 누가, 무엇을, 얼마나 썼는지가 그대로 남습니다.
@@ -36,6 +42,8 @@ Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmen
 
 작업이 끝난 뒤에는 InvoiceGenerationService가 Invoice__c를 만들고 PaymentCalloutQueueable이 결제를 트리거합니다. 부품 재고가 재주문 기준 아래로 떨어지면 Part_Reorder__e 플랫폼 이벤트가 발행되고 ERPInventorySyncService가 이를 받아 처리합니다. 경로, 결제, 고객 알림, 날씨, 재고 ERP, 이 다섯 개의 외부 시스템과 주고받은 요청과 응답은 전부 Integration_Log__c에 남아서, 나중에 무슨 일이 있었는지 추적할 수 있습니다.
 
+</br>
+
 ## Service Cloud 확장 영역
 
 계약을 맺고 현장 작업까지 이어지는 흐름을 만들고 나니, 그 반대 방향의 흐름이 비어 있었습니다. 고객이 설비 문제를 먼저 알려오는 경우입니다. 이 부분을 표준 Case 오브젝트로 확장해서, 문의 접수부터 현장 작업 전환, 계약 등급별 SLA 관리까지 이어지도록 만들었습니다.
@@ -43,6 +51,8 @@ Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmen
 Case에는 문의 유형(Case_Category__c)과 현장 방문 필요 여부(Requires_Field_Visit__c), 그리고 어느 서비스 계약의 SLA를 따라야 하는지를 나타내는 Service_Contract__c 필드를 추가했습니다. 담당자가 Requires_Field_Visit__c를 체크하는 순간이 두 영역을 잇는 지점입니다. CaseToWorkOrderService가 그 계약 아래 새 Work Order를 만들면서 Case의 우선순위와 문의 유형에 맞는 기술자 스킬을 그대로 승계시키고, 그 Work Order가 insert되는 순간 이미 만들어져 있던 WorkOrderTriggerHandler와 TechnicianAssignmentService가 자동으로 반응해 기술자를 배정합니다. Case 쪽 코드는 기술자 배정 로직을 전혀 호출하지 않는데도 그 결과가 이어지는 구조입니다.
 
 Cobalt는 Enterprise, Pro, Starter 세 등급으로 계약을 팔지만 실제로는 모든 문의를 같은 속도로 처리하고 있었습니다. 이 격차는 Salesforce의 Entitlement Management로 메웠습니다. Case가 생성되면 CaseEntitlementService가 연결된 계약의 등급을 읽어 그에 맞는 Entitlement Process(Cobalt Enterprise/Pro/Starter SLA)를 연결하고, 그 순간부터는 Apex가 아니라 플랫폼이 Business Hours를 반영해 최초 응답과 해결까지의 마일스톤을 스스로 추적합니다. 최초 응답 목표 시간을 넘기면 Case가 자동으로 Escalated 상태로 바뀌고 매니저에게 이메일이 발송됩니다.
+
+</br>
 
 ## 주요 기능
 
@@ -78,6 +88,8 @@ Cobalt는 Enterprise, Pro, Starter 세 등급으로 계약을 팔지만 실제�
 
 - 계약 등급별 SLA 관리(Entitlement Process, Milestone)와 위반 시 자동 에스컬레이션
 
+</br>
+
 ## 사용한 기술
 
 - Apex (트리거, 서비스 클래스, Queueable, Batch, REST 리소스)
@@ -93,6 +105,8 @@ Cobalt는 Enterprise, Pro, Starter 세 등급으로 계약을 팔지만 실제�
 - Entitlement Management (Milestone Type, Entitlement Process)
 
 - Apex 단위 테스트와 Jest
+
+</br>
 
 ## 폴더 구조
 
@@ -116,62 +130,60 @@ force-app/main/default/
 scripts/            데모 데이터 시딩과 정리에 쓴 Apex, SOQL 스크립트
 ```
 
-## 트러블슈팅
+</br>
+
+## TroubleShooting
 
 작업하면서 실제로 막혔던 부분들과, 그걸 어떻게 원인을 찾아서 풀었는지 기록입니다.
 
 ### 1. Work Order 사진 갤러리 업로드 실패: "유효한 사진 데이터가 없습니다"
 
-**문제**
+**문제** : 
 workPhotoGallery LWC에서 현장 사진을 올리면 매번 "유효한 사진 데이터가 없습니다" 오류가 나며 실패했습니다. 브라우저 네트워크 탭으로 요청을 직접 열어봐도 base64 이미지 데이터가 페이로드에 정상적으로 담겨 나가고 있었습니다.
 
-**원인**
+**원인** : 
 클라이언트가 보내는 데이터는 멀쩡한데 서버(Apex)에서만 비어있다는 뜻이었으므로, LWC → Apex 사이의 역직렬화 구간을 의심했습니다. `XMLHttpRequest.prototype.send`를 임시로 가로채 실제 전송 payload를 확인하고, Apex 쪽에는 `System.debug`를 심어 `sf apex tail log`로 서버가 받은 값을 대조한 결과, imperative Apex 메서드의 파라미터가 `List<PhotoInput>`처럼 커스텀 Apex inner class일 때 필드가 조용히 `null`로 역직렬화되는 것을 확인했습니다. 이미 문제없이 동작하던 `FieldCompletionController.saveSignature`는 `Id`, `String` 같은 단순 타입만 받고 있다는 점에서 원인의 실마리를 잡았습니다.
 
-**해결**
+**해결** : 
 `savePhotos(Id, List<PhotoInput>)` 시그니처를 버리고, `savePhoto(Id workOrderId, String fileName, String base64Data)`처럼 평평한 기본 타입 파라미터로 바꿔 사진 한 장씩 호출하도록 LWC와 Apex 컨트롤러를 함께 수정했습니다. 관련 Apex 테스트도 새 시그니처에 맞춰 다시 작성했습니다.
+
+</br>
 
 ### 2. Lead 담당자 배정에 사용자 Id가 하드코딩됨
 
-**문제**
+**문제** : 
 하드코딩 점검 중 `Lead_Scoring_and_Routing` Flow의 담당자 배정 요소(`Assign_Senior_Owner`/`Assign_Rep_Owner`)에 특정 사용자의 Id가 문자열로 그대로 박혀 있는 것을 발견했습니다. 담당자가 바뀌거나 다른 조직으로 이전하면 이 값들이 전부 깨지는 구조였습니다.
 
-**원인**
+**원인** : 
 Flow를 처음 만들 때 담당자 배정을 사람의 Id로 직접 지정해서, 조직 구조나 담당자가 바뀔 때마다 Flow 자체를 열어 값을 고쳐야 하는 방식으로 설계되어 있었습니다.
 
-**해결**
+**해결** : 
 `Senior_Rep_Queue`, `Rep_Queue` 두 개의 Queue를 새로 만들고, Flow 안에 Get Records 요소(`Group` 오브젝트를 `Type='Queue' AND DeveloperName=...`로 조회)를 추가해 실행 시점에 Queue Id를 동적으로 찾도록 바꿨습니다. Before-Save Flow는 레코드 생성/수정 요소는 못 쓰지만 Get Records는 지원한다는 점을 먼저 확인한 뒤 진행했고, 실제 테스트 Lead를 만들어 `OwnerId`가 Queue로 정상 배정되는 것까지 확인했습니다.
+
+</br>
 
 ### 3. Approval Process 승인자를 Role/Queue로 바꾸려다 플랫폼 제약에 막힘
 
-**문제**
+**문제** : 
 `Cobalt_Discount_Approval` 승인 프로세스도 승인자가 특정 사용자 이메일로 고정되어 있었습니다. Role이나 Queue 기반으로 바꾸면 담당자가 바뀌어도 승인 프로세스를 건드릴 필요가 없어질 것으로 보고 두 가지를 차례로 시도했습니다.
 
-**원인**
+**원인** : 
 - 먼저 승인자 타입을 `role`로 배포했더니 "`role`은 유효한 Approver 타입이 아니다"라는 에러가 났습니다. Salesforce 공식 Metadata API 문서를 확인해보니 `Approver.type`에는 애초에 `adhoc`/`user`/`userHierarchyField`/`relatedUserField`/`queue` 다섯 가지만 존재하고 `role`은 없었습니다.
 - 그래서 `type=queue`로 바꾸고 새 Queue(`VP_Sales_Approval_Queue` 등)를 만들었는데, 이번엔 Queue의 `sobjectType`에 `Opportunity`를 넣는 순간 "bad value for restricted picklist field: Opportunity"로 배포가 거부됐습니다. 확인해보니 Opportunity는 애초에 Queue가 소유할 수 있는 오브젝트 목록에 없었고, Salesforce IdeaExchange에도 이 기능을 요청하는 미해결 아이디어가 등록되어 있을 만큼 플랫폼 자체의 한계였습니다.
 
-**해결**
+**해결** : 
 두 방법 모두 플랫폼 제약으로 막혀 있었기 때문에, 억지로 우회하지 않고 승인자를 원래의 `type=user` 하드코딩 방식으로 되돌렸습니다. 대신 왜 role/queue를 쓸 수 없었는지와, 담당자가 바뀌면 반드시 이 두 이메일을 함께 갱신해야 한다는 점을 승인 프로세스 XML에 주석으로 남겨두었습니다. 새로 만들었던 승인용 Queue 두 개도 다시 정리(삭제)했습니다.
+
+</br>
 
 ### 4. 메타데이터 배포가 일부만 성공한 것처럼 보이다가 전체 롤백됨
 
-**문제**
+**문제** : 
 Queue 2개, Flow 수정, Approval Process 수정을 한 번의 배포로 묶어서 올렸는데, 진행 상황에는 "10/11 성공"처럼 표시되다가 최종 결과가 Failed로 끝났고, 이미 성공한 것처럼 보였던 Queue조차 org에 남아있지 않았습니다.
 
-**원인**
+**원인** : 
 Salesforce Metadata API 배포는 구성요소 하나라도 실패하면 같은 배포 안의 나머지 구성요소까지 전부 롤백되는 all-or-nothing 트랜잭션이기 때문이었습니다. 진행률 표시는 개별 컴포넌트 검증 단계일 뿐, 배포 자체가 원자적으로 커밋되거나 통째로 취소된다는 점을 다시 확인했습니다.
 
-**해결**
+**해결** : 
 의존관계가 없는 Queue만 먼저 단독으로 배포해 org에 확실히 커밋시킨 뒤, 그 Queue를 참조하는 Flow/Approval Process 변경분은 별도의 두 번째 배포로 나눠서 진행했습니다.
 
-### 5. git push가 응답 없이 멈춤
-
-**문제**
-작업을 커밋한 뒤 `git push`를 실행하면 아무 출력 없이 계속 멈춰 있었고, 이 현상이 여러 차례 반복됐습니다.
-
-**원인**
-`GIT_TRACE=1 GIT_CURL_VERBOSE=1`로 push를 다시 실행해 원격 통신을 추적해보니, 서버가 401을 반환한 직후 Git Credential Manager가 브라우저 기반 대화형 재인증 창을 띄우려고 시도했습니다. 이 작업 환경은 헤드리스라 그 창을 띄우거나 완료할 방법이 없어 그대로 무한 대기 상태에 빠지는 것이었습니다.
-
-**해결**
-코드나 리포지토리 설정으로 고칠 수 있는 문제가 아니었기 때문에, 사용자가 직접 터미널에서 인증을 완료하거나 push를 재시도하도록 안내했습니다. 실제로 재시도만으로 정상적으로 넘어가는 경우가 대부분이었습니다.
