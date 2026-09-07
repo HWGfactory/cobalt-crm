@@ -24,23 +24,23 @@ Cobalt의 영업팀이 겪는 문제는 두 가지였습니다. 하나는 딜이
 
 두 번째 문제는 할인 승인 프로세스로 풀었습니다. Proposal 단계에서 할인율이 15퍼센트를 넘으면 VP의 승인 없이는 그 단계로 들어갈 수 없습니다. Cobalt_Discount_Approval 승인 프로세스가 이 흐름을 처리하고, 승인이나 반려가 나면 이메일로 담당자에게 자동으로 알립니다.
 
-그 앞단에서는 Lead_Scoring_and_Routing이 들어온 리드를 점수로 나눠 담당자에게 배분하고, Account에는 최근 12개월 매출과 오픈 파이프라인 합계가 롤업되어서 영업 담당자가 계정 단위로 상태를 바로 볼 수 있습니다. 큰 계약 전에는 Pilot__c로 소규모 시범 운영을 먼저 돌리는데, Pilot_AtRisk_Alert과 Pilot_EndDate_Reminder가 파일럿이 위험 상태이거나 종료일이 다가올 때 담당자에게 알려주고, Opportunity 화면의 Pilot Health Cockpit 위젯에서 MEDDIC 완성도와 파일럿 진행 상태를 한 번에 확인할 수 있습니다.
+그 앞단에서는 Lead_Scoring_and_Routing이 들어온 리드를 점수로 나눠 담당자에게 배분하고, Account에는 최근 12개월 매출과 오픈 파이프라인 합계가 롤업되어서 영업 담당자가 계정 단위로 상태를 바로 볼 수 있습니다. 큰 계약 전에는 Pilot로 소규모 시범 운영을 먼저 돌리는데, Pilot_AtRisk_Alert과 Pilot_EndDate_Reminder가 파일럿이 위험 상태이거나 종료일이 다가올 때 담당자에게 알려주고, Opportunity 화면의 Pilot Health Cockpit 위젯에서 MEDDIC 완성도와 파일럿 진행 상태를 한 번에 확인할 수 있습니다.
 
 계약이 체결된 뒤에도 영업의 일은 끝나지 않습니다. Contract_Renewal_Reminder가 만료 90/60/30일 전 담당자에게 갱신을 상기시키고, 90일 전 시점에는 원래 계약 금액을 그대로 승계한 갱신용 Opportunity를 자동으로 만들어 영업이 다시 처음부터 준비할 필요가 없게 합니다.
 
 ## 현장 서비스 실행 영역
 
-Pilot이 통과하거나 계약이 성사되면 Service_Contract__c가 만들어집니다. 이 서비스 계약 안에서 실제 작업 단위인 Work_Order__c가 여러 건 생기고, 하나의 Work Order는 Technician__c(배정된 기술자), Part_Line__c(사용한 부품과 수량)와 연결됩니다. 그래서 한 번의 출동에 누가, 무엇을, 얼마나 썼는지가 그대로 남습니다.
+Pilot이 통과하거나 계약이 성사되면 Service Contract가 만들어집니다. 이 서비스 계약 안에서 실제 작업 단위인 Work Order가 여러 건 생기고, 하나의 Work Order는 Technician(배정된 기술자), Part Line(사용한 부품과 수량)와 연결됩니다. 그래서 한 번의 출동에 누가, 무엇을, 얼마나 썼는지가 그대로 남습니다.
 
 Work Order가 새로 생기면 TechnicianAssignmentService와 WorkOrderAssignmentBatch가 조건에 맞는 기술자를 찾아 배정합니다. 배정이 안 된 건은 Dispatcher_Queue로 모이고, dispatcherBoard LWC에서 디스패처가 직접 배정할 수 있습니다. 작업 중에는 slaCountdown이 SLA 마감까지 남은 시간을 보여주고, WeatherRescheduleService가 날씨 때문에 일정을 조정해야 하는 경우를 처리합니다. 상태가 출동, 현장 도착, 완료로 바뀔 때마다 SendCustomerNotification이 고객에게 자동으로 문자 알림을 보냅니다. 작업이 끝나면 fieldCompletion과 workPhotoGallery로 완료 처리와 현장 사진 업로드가 이루어집니다.
 
-작업이 끝난 뒤에는 InvoiceGenerationService가 Invoice__c를 만들고 PaymentCalloutQueueable이 결제를 트리거합니다. 부품 재고가 재주문 기준 아래로 떨어지면 Part_Reorder__e 플랫폼 이벤트가 발행되고 ERPInventorySyncService가 이를 받아 처리합니다. 경로, 결제, 고객 알림, 날씨, 재고 ERP, 이 다섯 개의 외부 시스템과 주고받은 요청과 응답은 전부 Integration_Log__c에 남아서, 나중에 무슨 일이 있었는지 추적할 수 있습니다.
+작업이 끝난 뒤에는 InvoiceGenerationService가 Invoice를 만들고 PaymentCalloutQueueable이 결제를 트리거합니다. 부품 재고가 재주문 기준 아래로 떨어지면 Part Reorder 플랫폼 이벤트가 발행되고 ERPInventorySyncService가 이를 받아 처리합니다. 경로, 결제, 고객 알림, 날씨, 재고 ERP, 이 다섯 개의 외부 시스템과 주고받은 요청과 응답은 전부 Integration Log에 남아서, 나중에 무슨 일이 있었는지 추적할 수 있습니다.
 
 ## Service Cloud 확장 영역
 
 계약을 맺고 현장 작업까지 이어지는 흐름을 만들고 나니, 그 반대 방향의 흐름이 비어 있었습니다. 고객이 설비 문제를 먼저 알려오는 경우입니다. 이 부분을 표준 Case 오브젝트로 확장해서, 문의 접수부터 현장 작업 전환, 계약 등급별 SLA 관리까지 이어지도록 만들었습니다.
 
-Case에는 문의 유형(Case_Category__c)과 현장 방문 필요 여부(Requires_Field_Visit__c), 그리고 어느 서비스 계약의 SLA를 따라야 하는지를 나타내는 Service_Contract__c 필드를 추가했습니다. 담당자가 Requires_Field_Visit__c를 체크하는 순간이 두 영역을 잇는 지점입니다. CaseToWorkOrderService가 그 계약 아래 새 Work Order를 만들면서 Case의 우선순위와 문의 유형에 맞는 기술자 스킬을 그대로 승계시키고, 그 Work Order가 insert되는 순간 이미 만들어져 있던 WorkOrderTriggerHandler와 TechnicianAssignmentService가 자동으로 반응해 기술자를 배정합니다. Case 쪽 코드는 기술자 배정 로직을 전혀 호출하지 않는데도 그 결과가 이어지는 구조입니다.
+Case에는 문의 유형(Case Category)과 현장 방문 필요 여부(Requires Field Visit), 그리고 어느 서비스 계약의 SLA를 따라야 하는지를 나타내는 Service Contract 필드를 추가했습니다. 담당자가 Requires Field Visit를 체크하는 순간이 두 영역을 잇는 지점입니다. CaseToWorkOrderService가 그 계약 아래 새 Work Order를 만들면서 Case의 우선순위와 문의 유형에 맞는 기술자 스킬을 그대로 승계시키고, 그 Work Order가 insert되는 순간 이미 만들어져 있던 WorkOrderTriggerHandler와 TechnicianAssignmentService가 자동으로 반응해 기술자를 배정합니다. Case 쪽 코드는 기술자 배정 로직을 전혀 호출하지 않는데도 그 결과가 이어지는 구조입니다.
 
 Cobalt는 Enterprise, Pro, Starter 세 등급으로 계약을 팔지만 실제로는 모든 문의를 같은 속도로 처리하고 있었습니다. 이 격차는 Salesforce의 Entitlement Management로 메웠습니다. Case가 생성되면 CaseEntitlementService가 연결된 계약의 등급을 읽어 그에 맞는 Entitlement Process(Cobalt Enterprise/Pro/Starter SLA)를 연결하고, 그 순간부터는 Apex가 아니라 플랫폼이 Business Hours를 반영해 최초 응답과 해결까지의 마일스톤을 스스로 추적합니다. 최초 응답 목표 시간을 넘기면 Case가 자동으로 Escalated 상태로 바뀌고 매니저에게 이메일이 발송됩니다.
 
